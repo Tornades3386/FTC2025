@@ -40,4 +40,11 @@ public class Constants {
                 new Translation2d(-WHEEL_BASE / 2, -TRACK_WIDTH / 2), // Rear left
                 new Translation2d(WHEEL_BASE / 2, -TRACK_WIDTH / 2)); // Rear right
     }
+    public static class GrabberConstants {
+        public static String GRABBER_LEFT_MOTOR_NAME = "leftGrabber";
+        public static String GRABBER_RIGHT_MOTOR_NAME = "leftGrabber";
+        public static String POIGNET_SERVO_NAME = "servoGrabberPoignet";
+        public static String PINCE_SERVO_NAME = "servoGrabberPince";
+
+    }
 }

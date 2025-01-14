@@ -20,9 +20,36 @@ public class Teleop extends Robot {
                     pilotController.getRightX() * movementSlowdown * Constants.DriveConstants.MAX_ROTATION_PER_SECOND
             ), true, robotGlobal.driverRotation);
 
-            if (pilotController.wasJustPressed(GamepadKeys.Button.START)) {
-                robotDrive.resetPose(new Pose2d().rotate(-Math.PI * 1.5));
-            }
+            //if (pilotController.wasJustPressed(GamepadKeys.Button.START)) {
+            //    robotDrive.resetPose(new Pose2d().rotate(-Math.PI * 1.5));
+            //}
         }, robotDrive));
+
+        robotGrabber.setDefaultCommand(new RunCommand(() -> {
+            if (pilotController.isDown(GamepadKeys.Button.X) || copilotController.isDown(GamepadKeys.Button.A)) {
+                robotGrabber.setPrinceSpeed(
+                        (pilotController.isDown(GamepadKeys.Button.X) ? 1 : 0) +
+                                (pilotController.isDown(GamepadKeys.Button.A) ? -1 : 0)
+                );
+            } /*else if (copilotController.wasJustReleased(GamepadKeys.Button.X) || copilotController.wasJustReleased(GamepadKeys.Button.A)) {
+            robotGrabber.stopPrinceSpeed();
+
+        }*/
+
+        /*if (pilotController.isDown(GamepadKeys.Button.Y) || copilotController.isDown(GamepadKeys.Button.B)) {
+            robotGrabber.setPoignetSpeed(
+                    (pilotController.isDown(GamepadKeys.Button.Y) ? 0.3 : 0)+
+                            (pilotController.isDown(GamepadKeys.Button.B) ? -0.3 : 0)
+            );}*/
+
+            if (pilotController.isDown(GamepadKeys.Button.Y) || copilotController.isDown(GamepadKeys.Button.B)) {
+                robotGrabber.setGrabberPower(
+                        (pilotController.isDown(GamepadKeys.Button.Y) ? 0.1 : 0) +
+                                (pilotController.isDown(GamepadKeys.Button.B) ? -0.1 : 0)
+                );
+            } else if (copilotController.wasJustReleased(GamepadKeys.Button.Y) || copilotController.wasJustReleased(GamepadKeys.Button.B)) {
+                robotGrabber.stopGRabberPower();
+            }
+        }, robotGrabber));
     }
 }

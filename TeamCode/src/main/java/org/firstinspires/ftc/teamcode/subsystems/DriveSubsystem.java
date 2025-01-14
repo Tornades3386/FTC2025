@@ -57,8 +57,9 @@ public class DriveSubsystem extends SubsystemBase {
         rearLeft.setRunMode(Motor.RunMode.VelocityControl);
         rearRight.setRunMode(Motor.RunMode.VelocityControl);
 
-        imu = new RevIMU(globalSubsystem.hardwareMap, "navx");
-        imu.invertGyro();
+        //imu = new RevIMU(globalSubsystem.hardwareMap, "navx");
+
+        //imu.invertGyro();
     }
 
     public void drive(ChassisSpeeds chassisSpeeds, boolean fieldRelative, Rotation2d rotateBy) {
@@ -78,15 +79,15 @@ public class DriveSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {}
-    public void resetGyro() {
+    /*public void resetGyro() {
         imu.reset();
-    }
+    }*/
 
     public Pose2d getPose() {
         return odometry.getPoseMeters();
     }
 
-    public void resetPose(Pose2d newPose) {
+    /*public void resetPose(Pose2d newPose) {
         odometry.resetPosition(newPose, imu.getRotation2d());
-    }
+    }*/
 }
