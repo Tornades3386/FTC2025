@@ -26,30 +26,40 @@ public class Teleop extends Robot {
         }, robotDrive));
 
         robotGrabber.setDefaultCommand(new RunCommand(() -> {
-            if (pilotController.isDown(GamepadKeys.Button.X) || copilotController.isDown(GamepadKeys.Button.A)) {
-                robotGrabber.setPrinceSpeed(
-                        (pilotController.isDown(GamepadKeys.Button.X) ? 1 : 0) +
-                                (pilotController.isDown(GamepadKeys.Button.A) ? -1 : 0)
+            if (pilotController.wasJustReleased(GamepadKeys.Button.X)) {
+                robotGrabber.setPoignetPrinceSpeed(
                 );
-            } /*else if (copilotController.wasJustReleased(GamepadKeys.Button.X) || copilotController.wasJustReleased(GamepadKeys.Button.A)) {
+            } /*else if (pilotController.wasJustReleased(GamepadKeys.Button.X) || pilotController.wasJustReleased(GamepadKeys.Button.A)) {
             robotGrabber.stopPrinceSpeed();
 
         }*/
 
-        /*if (pilotController.isDown(GamepadKeys.Button.Y) || copilotController.isDown(GamepadKeys.Button.B)) {
-            robotGrabber.setPoignetSpeed(
-                    (pilotController.isDown(GamepadKeys.Button.Y) ? 0.3 : 0)+
-                            (pilotController.isDown(GamepadKeys.Button.B) ? -0.3 : 0)
-            );}*/
+            /*if (pilotController.isDown(GamepadKeys.Button.Y) || pilotController.isDown(GamepadKeys.Button.B)) {
+                robotGrabber.setPoignetSpeed(
+                        (pilotController.isDown(GamepadKeys.Button.Y) ? 0.1 : 0)+
+                                (pilotController.isDown(GamepadKeys.Button.B) ? -0.1: 0)
+            );}/*else if (pilotController.wasJustReleased(GamepadKeys.Button.Y) || pilotController.wasJustReleased(GamepadKeys.Button.B)) {
+            robotGrabber.stop();*/
 
-            if (pilotController.isDown(GamepadKeys.Button.Y) || copilotController.isDown(GamepadKeys.Button.B)) {
+            if (pilotController.wasJustPressed(GamepadKeys.Button.DPAD_LEFT) || pilotController.isDown(GamepadKeys.Button.DPAD_RIGHT)) {
                 robotGrabber.setGrabberPower(
-                        (pilotController.isDown(GamepadKeys.Button.Y) ? 0.1 : 0) +
-                                (pilotController.isDown(GamepadKeys.Button.B) ? -0.1 : 0)
+                        (pilotController.wasJustPressed(GamepadKeys.Button.DPAD_LEFT) ? -0.7 : 0) +
+                                (pilotController.isDown(GamepadKeys.Button.DPAD_RIGHT) ? 0.7 : 0)
                 );
-            } else if (copilotController.wasJustReleased(GamepadKeys.Button.Y) || copilotController.wasJustReleased(GamepadKeys.Button.B)) {
-                robotGrabber.stopGRabberPower();
+            } else if (pilotController.wasJustReleased(GamepadKeys.Button.DPAD_LEFT) || pilotController.wasJustReleased(GamepadKeys.Button.DPAD_RIGHT)) {
+                robotGrabber.stopGrabberPower();
             }
         }, robotGrabber));
+
+        robotElevator.setDefaultCommand(new RunCommand(()->{
+            if (pilotController.isDown(GamepadKeys.Button.DPAD_UP) || pilotController.isDown(GamepadKeys.Button.DPAD_DOWN)) {
+                robotElevator.setElevator(
+                        (pilotController.isDown(GamepadKeys.Button.DPAD_UP) ? 1 : 0) +
+                                (pilotController.isDown(GamepadKeys.Button.DPAD_DOWN) ? -1 : 0)
+                );
+            } else if (pilotController.wasJustReleased(GamepadKeys.Button.DPAD_UP) || pilotController.wasJustReleased(GamepadKeys.Button.DPAD_DOWN)) {
+                robotElevator.stopElevator();
+            }
+        },robotElevator));
     }
 }

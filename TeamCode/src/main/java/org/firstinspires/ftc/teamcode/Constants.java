@@ -45,6 +45,13 @@ public class Constants {
         public static String GRABBER_RIGHT_MOTOR_NAME = "leftGrabber";
         public static String POIGNET_SERVO_NAME = "servoGrabberPoignet";
         public static String PINCE_SERVO_NAME = "servoGrabberPince";
+        public static String GRABBER_DROP_LIMIT = "grabberDropLimit";
 
+    }
+    public static class ElevatorConstants {
+        public static String ELEVATOR_LEFT_MOTOR_NAME = "leftElevator";
+        public static String ELEVATOR_RIGHT_MOTOR_NAME = "leftElevator";
+
+        public static String ELEVATOR_DOWN_LIMIT = "downElevator";
     }
 }

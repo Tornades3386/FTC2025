@@ -8,6 +8,9 @@ import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.arcrobotics.ftclib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.arcrobotics.ftclib.kinematics.wpilibkinematics.MecanumDriveOdometry;
+import com.qualcomm.hardware.bosch.BHI260IMU;
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.Constants.DriveConstants;
@@ -33,6 +36,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     public void init() {
         GlobalSubsystem globalSubsystem = GlobalSubsystem.getInstance();
+        HardwareMap hardwareMap = GlobalSubsystem.getInstance().hardwareMap;
 
         frontLeft = new MotorEx(globalSubsystem.hardwareMap, DriveConstants.FRONT_LEFT_MOTOR_NAME);
         frontRight = new MotorEx(globalSubsystem.hardwareMap, DriveConstants.FRONT_RIGHT_MOTOR_NAME);
@@ -57,6 +61,7 @@ public class DriveSubsystem extends SubsystemBase {
         rearLeft.setRunMode(Motor.RunMode.VelocityControl);
         rearRight.setRunMode(Motor.RunMode.VelocityControl);
 
+        //imu = hardwareMap.get(RevIMU.class, "navx");
         //imu = new RevIMU(globalSubsystem.hardwareMap, "navx");
 
         //imu.invertGyro();
@@ -90,4 +95,5 @@ public class DriveSubsystem extends SubsystemBase {
     /*public void resetPose(Pose2d newPose) {
         odometry.resetPosition(newPose, imu.getRotation2d());
     }*/
+
 }

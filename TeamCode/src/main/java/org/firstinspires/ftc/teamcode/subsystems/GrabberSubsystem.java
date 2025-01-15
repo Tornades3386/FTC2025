@@ -24,7 +24,8 @@ public class GrabberSubsystem extends SubsystemBase {
     private Telemetry telemetry;
     private static double newPositionPINCE;
     private static double newPositionPoignet;
-    private boolean leftState, rightState;
+    private boolean dropState, pinceState, rightState;
+    private DigitalChannel grabberDropLimit;
 
     private GrabberSubsystem() {}
 
@@ -41,7 +42,7 @@ public class GrabberSubsystem extends SubsystemBase {
         grabberRightMotor = new MotorEx(globalSubsystem.hardwareMap, GrabberConstants.GRABBER_LEFT_MOTOR_NAME);
         grabberLeftMotor = new MotorEx(globalSubsystem.hardwareMap, GrabberConstants.GRABBER_RIGHT_MOTOR_NAME);
 
-        poignetServo = new SimpleServo(hardwareMap, GrabberConstants.POIGNET_SERVO_NAME, 0, 0);
+        poignetServo = new SimpleServo(hardwareMap, GrabberConstants.POIGNET_SERVO_NAME, 0.25, 1);
         pinceServo = hardwareMap.get(CRServo.class, GrabberConstants.PINCE_SERVO_NAME);
 
 
@@ -59,51 +60,93 @@ public class GrabberSubsystem extends SubsystemBase {
         grabberRightMotor.resetEncoder();
         grabberLeftMotor.resetEncoder();
 
-        poignetServo.setPosition(0.50);
+        //poignetServo.setPosition(0.50);
         //pinceServo.set(0.50);
 
-        leftState = false;
+        pinceState = false;
         rightState = false;
+        dropState = false;
 
 
         //rotationEncoder = new AnalogEncoder(ArmConstants.ROTATION_ENCODER_NAME, 270);
         //extendEncoder = new AnalogEncoder(ArmConstants.EXTEND_ENCODER_NAME, 360);
 
-        //topLimit = globalSubsystem.hardwareMap.get(DigitalChannel.class, ArmConstants.TOP_LIMIT_SWITCH_NAME);
+        grabberDropLimit = globalSubsystem.hardwareMap.get(DigitalChannel.class, GrabberConstants.GRABBER_DROP_LIMIT);
         //bottomLimit = globalSubsystem.hardwareMap.get(DigitalChannel.class, ArmConstants.BOTTOM_LIMIT_SWITCH_NAME);
 
-        //topLimit.setMode(DigitalChannel.Mode.INPUT);
+        grabberDropLimit.setMode(DigitalChannel.Mode.INPUT);
         //bottomLimit.setMode(DigitalChannel.Mode.INPUT);
     }
 
 
-    public void setPrinceSpeed(double speed) {
+    /*public void setPrinceSpeed(double speed) {
         //newPositionPINCE = pinceServo.getPosition() + speed;
         //pinceServo.setPosition(pinceServo.getPosition() + speed);
-        pinceServo.setPower(speed);
-    }
+        if (!pinceState){
+            pinceServo.setPower(speed);
+            pinceState = true;
+        }
+        else if (pinceState) {
+            pinceServo.setPower(0);
+            pinceState = false;
+        }
+    }*/
 
-    public void setPoignetSpeed(double speed) {
-        newPositionPoignet = poignetServo.getPosition() + speed;
-        //pinceServo.setPosition(pinceServo.getPosition() + speed);
-        poignetServo.setPosition(newPositionPoignet);
+    public void stopPrinceSpeed() {pinceServo.setPower(0);}
+
+    public void setPoignetPrinceSpeed() {
+        poignetServo.setPosition(0.25);
+        pinceServo.setPower(1);
     }
 
     public void setGrabberPower(double power){
-        grabberRightMotor.set(power);
-        grabberLeftMotor.set(power);
+        if (power < 0 ) {
+
+            if (!grabberDropLimit.getState() & dropState) {
+
+                poignetServo.setPosition(1);
+                grabberRightMotor.set(0);
+                grabberLeftMotor.set(0);
+                while (dropState) {
+                    grabberRightMotor.set(0);
+                    grabberLeftMotor.set(0);
+
+                    if (poignetServo.getPosition() == 1) {
+                        pinceServo.setPower(-0.25);
+                        dropState = false;
+                    }
+
+                }
+            } else if (grabberRightMotor.getCurrentPosition() <= 1) {
+                grabberRightMotor.set(0);
+                grabberLeftMotor.set(0);
+            }
+            else  {
+                grabberRightMotor.set(power);
+                grabberLeftMotor.set(power);
+            }
+        }
+
+        else {
+            grabberRightMotor.set(power);
+            grabberLeftMotor.set(power);
+            dropState = true;
+
+        }
+
     }
 
-    public void stopGRabberPower(){
+    public void stopGrabberPower(){
         grabberRightMotor.set(0);
         grabberLeftMotor.set(0);
     }
 
-    //public void stopPrinceSpeed() {pinceServo.setPosition(pinceServo.getPosition());}
+
 
     public void periodic() {
         telemetry.addData("Poignet", poignetServo.getPosition());
-        //telemetry.addData("Pince", );
+        telemetry.addData("Grabber Encoder", grabberRightMotor.getCurrentPosition());
+        //telemetry.addData("Pince", pinceServo.get );
         //pinceServo.setPower(0.3);
 
 
