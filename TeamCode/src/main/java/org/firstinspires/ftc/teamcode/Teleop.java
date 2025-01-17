@@ -26,6 +26,14 @@ public class Teleop extends Robot {
         }, robotDrive));
 
         robotGrabber.setDefaultCommand(new RunCommand(() -> {
+            boolean movementForwardGrabber = false;
+            boolean movementBackGrabber = false;
+            if (pilotController.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0) {
+                movementForwardGrabber = true;
+            } else if (pilotController.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0) {
+                movementBackGrabber = true;
+            }
+
             if (pilotController.wasJustReleased(GamepadKeys.Button.X)) {
                 robotGrabber.setPoignetPrinceSpeed(
                 );
@@ -41,12 +49,12 @@ public class Teleop extends Robot {
             );}/*else if (pilotController.wasJustReleased(GamepadKeys.Button.Y) || pilotController.wasJustReleased(GamepadKeys.Button.B)) {
             robotGrabber.stop();*/
 
-            if (pilotController.wasJustPressed(GamepadKeys.Button.DPAD_LEFT) || pilotController.isDown(GamepadKeys.Button.DPAD_RIGHT)) {
+            if (movementForwardGrabber || movementBackGrabber) {
                 robotGrabber.setGrabberPower(
-                        (pilotController.wasJustPressed(GamepadKeys.Button.DPAD_LEFT) ? -0.7 : 0) +
-                                (pilotController.isDown(GamepadKeys.Button.DPAD_RIGHT) ? 0.7 : 0)
+                        (movementBackGrabber ? -0.7 : 0) +
+                                (movementForwardGrabber ? 0.7 : 0)
                 );
-            } else if (pilotController.wasJustReleased(GamepadKeys.Button.DPAD_LEFT) || pilotController.wasJustReleased(GamepadKeys.Button.DPAD_RIGHT)) {
+            } else {
                 robotGrabber.stopGrabberPower();
             }
         }, robotGrabber));
