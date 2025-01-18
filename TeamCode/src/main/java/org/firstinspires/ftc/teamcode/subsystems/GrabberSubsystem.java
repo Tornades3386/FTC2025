@@ -53,9 +53,9 @@ public class GrabberSubsystem extends SubsystemBase {
         pinceServo = hardwareMap.get(CRServo.class, GrabberConstants.PINCE_SERVO_NAME);
 
 
-        grabberRightMotor.setRunMode(Motor.RunMode.PositionControl);
+        grabberRightMotor.setRunMode(Motor.RunMode.RawPower);
         grabberRightMotor.setZeroPowerBehavior(MotorEx.ZeroPowerBehavior.BRAKE);
-        grabberLeftMotor.setRunMode(Motor.RunMode.PositionControl);
+        grabberLeftMotor.setRunMode(Motor.RunMode.RawPower);
         grabberLeftMotor.setZeroPowerBehavior(MotorEx.ZeroPowerBehavior.BRAKE);
 
 

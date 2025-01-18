@@ -3,13 +3,14 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
-import com.arcrobotics.ftclib.hardware.RevIMU;
+import org.firstinspires.ftc.teamcode.RevIMU;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.arcrobotics.ftclib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.arcrobotics.ftclib.kinematics.wpilibkinematics.MecanumDriveOdometry;
 import com.qualcomm.hardware.bosch.BHI260IMU;
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -35,7 +36,9 @@ public class DriveSubsystem extends SubsystemBase {
     private final double teta = Math.toRadians(45);
     double epsilon = 0.00001;
     double factor = 1/Math.abs(Math.sin(teta));
-    private static IMU imu;
+//    private static IMU imu;
+//    private static NavxMicroNavigationSensor navx;
+    private static RevIMU imu;
     boolean isPOV = false;
     private static ChassisSpeeds targetChassisSpeeds = new ChassisSpeeds();
 
@@ -51,20 +54,19 @@ public class DriveSubsystem extends SubsystemBase {
 
         GlobalSubsystem globalSubsystem = GlobalSubsystem.getInstance();
         HardwareMap hardwareMap = GlobalSubsystem.getInstance().hardwareMap;
-        imu = hardwareMap.get(IMU.class, "imu");
-        imu.initialize(
-                new IMU.Parameters(
-                        new RevHubOrientationOnRobot(
-                                RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                                RevHubOrientationOnRobot.UsbFacingDirection.LEFT
-                        )
-                )
-        );
+//        imu = hardwareMap.get(IMU.class, "imu");
+//        imu.initialize(
+//                new IMU.Parameters(
+//                        new RevHubOrientationOnRobot(
+//                                RevHubOrientationOnRobot.LogoFacingDirection.UP,
+//                                RevHubOrientationOnRobot.UsbFacingDirection.LEFT
+//                        )
+//                )
+//        );
+        imu = new RevIMU(hardwareMap, "navx");
 
-
-
-
-        imu.resetYaw();
+//        imu.resetYaw();
+        imu.reset();
 
         Base.frontLeft = new MotorEx(globalSubsystem.hardwareMap, DriveConstants.FRONT_LEFT_MOTOR_NAME);
         Base.frontRight = new MotorEx(globalSubsystem.hardwareMap, DriveConstants.FRONT_RIGHT_MOTOR_NAME);
@@ -106,7 +108,7 @@ public class DriveSubsystem extends SubsystemBase {
     public void drive(ChassisSpeeds chassisSpeeds, boolean fieldRelative, Rotation2d rotateBy) {
         targetChassisSpeeds = fieldRelative ?
                 fromFieldRelativeSpeeds(
-                        chassisSpeeds, odometry.getPoseMeters().getRotation().plus(rotateBy))
+                        chassisSpeeds, imu.getRotation2d())
                 : chassisSpeeds;
     }
 
@@ -120,6 +122,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        GlobalSubsystem.getInstance().telemetry.addData("NavX", imu.getRotation2d());
         // Get Robot Orientation
         /*double turn = -gamepad1.right_stick_x;
         Point dir_vector = new Point(gamepad1.left_stick_x, -gamepad1.left_stick_y);
