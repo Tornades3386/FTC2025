@@ -28,7 +28,7 @@ public class GrabberSubsystem extends SubsystemBase {
     private ServoEx poignetServo;
     private Telemetry telemetry;
 
-    private static double newPositionPoignet;
+    private static double targetPositionPoignet, currentPosition;
     private boolean dropState, pinceState, rightState;
     private DigitalChannel grabberDropLimit;
     private ColorSensor colorPince;
@@ -53,9 +53,9 @@ public class GrabberSubsystem extends SubsystemBase {
         pinceServo = hardwareMap.get(CRServo.class, GrabberConstants.PINCE_SERVO_NAME);
 
 
-        grabberRightMotor.setRunMode(Motor.RunMode.RawPower);
+        grabberRightMotor.setRunMode(Motor.RunMode.PositionControl);
         grabberRightMotor.setZeroPowerBehavior(MotorEx.ZeroPowerBehavior.BRAKE);
-        grabberLeftMotor.setRunMode(Motor.RunMode.RawPower);
+        grabberLeftMotor.setRunMode(Motor.RunMode.PositionControl);
         grabberLeftMotor.setZeroPowerBehavior(MotorEx.ZeroPowerBehavior.BRAKE);
 
 
@@ -67,7 +67,8 @@ public class GrabberSubsystem extends SubsystemBase {
         grabberRightMotor.resetEncoder();
         grabberLeftMotor.resetEncoder();
 
-        poignetServo.setPosition(0.50);
+        currentPosition = 0.50;
+        poignetServo.setPosition(currentPosition);
         pinceServo.setPower(0);
 
         pinceState = false;
@@ -100,11 +101,13 @@ public class GrabberSubsystem extends SubsystemBase {
 
     public void setPoignetPrinceSpeed() {
         if (!pinceState){
-            poignetServo.setPosition(Math.max(0.25, Math.min(1, poignetServo.getPosition() - 2)));
+            currentPosition = Math.max(0.25, Math.min(1, poignetServo.getPosition() - 2));
+            //poignetServo.setPosition(Math.max(0.25, Math.min(1, poignetServo.getPosition() - 2)));
             pinceServo.setPower(1);
             pinceState = true;
-        }else if (grabberRightMotor.getCurrentPosition() > 400) {
-            poignetServo.setPosition(Math.max(0.25, Math.min(1, poignetServo.getPosition() + 2)));
+        }else {//if (grabberRightMotor.getCurrentPosition() > 400) {
+            currentPosition = Math.max(0.25, Math.min(1, poignetServo.getPosition() + 2));
+            //poignetServo.setPosition(Math.max(0.25, Math.min(1, poignetServo.getPosition() + 2)));
             pinceServo.setPower(0);
             pinceState = false;
         }
@@ -114,24 +117,59 @@ public class GrabberSubsystem extends SubsystemBase {
         if (power < 0 ) {
             //newPositionPoignet = Math.max(0.25, Math.min(1, poignetServo.getPosition() + 2));
             //poignetServo.setPosition(newPositionPoignet);
-
+            if (Double.parseDouble(JavaUtil.formatNumber(colorPince_DistanceSensor.getDistance(DistanceUnit.CM), 3)) < 3.2){
+                currentPosition = Math.max(0.25, Math.min(1, poignetServo.getPosition() + 2));
+            }
             if (!grabberDropLimit.getState()){
-                if (Double.parseDouble(JavaUtil.formatNumber(colorPince_DistanceSensor.getDistance(DistanceUnit.CM), 3)) < 3) {
+                if (Double.parseDouble(JavaUtil.formatNumber(colorPince_DistanceSensor.getDistance(DistanceUnit.CM), 3)) < 3.2) {
                     grabberRightMotor.stopMotor();
                     grabberLeftMotor.stopMotor();
+                    pinceServo.setPower(0.4);
                     final double TOLERANCE = 0.1;
-                    poignetServo.setPosition(Math.max(0.25, Math.min(1, poignetServo.getPosition() + 2)));
+                    //currentPosition = poignetServo.getPosition();
+                    currentPosition = poignetServo.getPosition();
+                    if (poignetServo.getPosition() <= 0.99) {
+                        currentPosition += 0.02;
+                    } else {
+                        pinceServo.setPower(-0.3);
+                    }
+                }
+                if (Double.parseDouble(JavaUtil.formatNumber(colorPince_DistanceSensor.getDistance(DistanceUnit.CM), 3)) > 3) {
+
+                    grabberRightMotor.set(power);
+                    grabberLeftMotor.set(power);
+                    //pinceState = false;
+                    currentPosition = (Math.max(0.25, Math.min(1, poignetServo.getPosition() - 2)));
+                    pinceServo.setPower(0);
+
+                }
 
 
-                    if (poignetServo.getPosition() == 1){
+                    /*for (; currentPosition < targetPositionPoignet;) {
+                        poignetServo.setPosition(currentPosition);  // Update the servo to the current position
+                        currentPosition += 0.001;  // Increment the position by 0.2
+                        if (poignetServo.getPosition() > 0.98) {
+                            //currentPosition = targetPositionPoignet;  // Prevent overshooting the target position
+                            pinceServo.setPower(-0.45);
+                            if (Double.parseDouble(JavaUtil.formatNumber(colorPince_DistanceSensor.getDistance(DistanceUnit.CM), 3)) > 3) {
+                                poignetServo.setPosition(Math.max(0.25, Math.min(1, poignetServo.getPosition() - 2)));
+                                pinceServo.setPower(0);
+                                pinceState = false;
+                            }
+                        }
+                    }*/
+                    //poignetServo.setPosition(Math.max(0.25, Math.min(1, poignetServo.getPosition() + 2)));
+
+
+                    /*if (poignetServo.getPosition() >=0.97){
                         pinceServo.setPower(-0.45);
                         if (Double.parseDouble(JavaUtil.formatNumber(colorPince_DistanceSensor.getDistance(DistanceUnit.CM), 3)) > 3) {
                             poignetServo.setPosition(Math.max(0.25, Math.min(1, poignetServo.getPosition() - 2)));
                             pinceServo.setPower(0);
                             pinceState = false;
                         }
-                    }
-                }
+                    }*/
+
 
                 //pinceServo.setPower(-0.25);
                 //dropState = false;
@@ -145,7 +183,7 @@ public class GrabberSubsystem extends SubsystemBase {
                     //}
 
                 //}
-            } else if (grabberRightMotor.getCurrentPosition() <= 1) {
+            } else if (grabberRightMotor.getCurrentPosition() <= 50) {
                 grabberRightMotor.stopMotor();
                 grabberLeftMotor.stopMotor();
             }
@@ -182,15 +220,17 @@ public class GrabberSubsystem extends SubsystemBase {
         telemetry.addData("Distance (cm)", Double.parseDouble(JavaUtil.formatNumber(colorPince_DistanceSensor.getDistance(DistanceUnit.CM), 3)));
 
         if(Double.parseDouble(JavaUtil.formatNumber(colorPince_DistanceSensor.getDistance(DistanceUnit.CM),3))<2 ) {
+
             if (pinceServo.getPower() > 0) {
-                pinceServo.setPower(0);
+                pinceServo.setPower(0.3);
                 pinceState = false;
             }
             ;//telemetry.addData("Pince", pinceServo.get );
         }
-        if(grabberRightMotor.getCurrentPosition() <600){
+        poignetServo.setPosition(currentPosition);
+        /*if(grabberRightMotor.getCurrentPosition() <600){
             poignetServo.setPosition(Math.max(0.25, Math.min(1, poignetServo.getPosition() - 2)));
-        }
+        }*/
         //pinceServo.setPower(0.3);
 
 

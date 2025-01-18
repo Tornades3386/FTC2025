@@ -50,8 +50,10 @@ public class Constants {
     }
     public static class ElevatorConstants {
         public static String ELEVATOR_LEFT_MOTOR_NAME = "leftElevator";
-        public static String ELEVATOR_RIGHT_MOTOR_NAME = "leftElevator";
-
+        public static String ELEVATOR_RIGHT_MOTOR_NAME = "rightElevator";
         public static String ELEVATOR_DOWN_LIMIT = "downElevator";
+        public static String ELEVATOR_0_SERVO_NAME = "elevator0";
+        public static String ELEVATOR_1_SERVO_NAME = "elevator1";
+        public static String ELEVATOR_2_SERVO_NAME = "elevator2";
     }
 }

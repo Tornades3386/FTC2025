@@ -51,8 +51,8 @@ public class Teleop extends Robot {
 
             if (movementForwardGrabber || movementBackGrabber) {
                 robotGrabber.setGrabberPower(
-                        (movementBackGrabber ? -0.7 : 0) +
-                                (movementForwardGrabber ? 0.7 : 0)
+                        (movementBackGrabber ? -1 : 0) +
+                                (movementForwardGrabber ? 1 : 0)
                 );
             } else {
                 robotGrabber.stopGrabberPower();
