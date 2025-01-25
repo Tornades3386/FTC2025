@@ -7,8 +7,8 @@ public class Constants {
     public static double CENTIMETER_PER_INCH = 2.54;
     public static double CENTIMETER_PER_INCH_INVERSE = 1 / CENTIMETER_PER_INCH;
     public static class DriveConstants {
-        public static double MAX_MOVEMENT_PER_SECOND = 300;
-        public static double MAX_ROTATION_PER_SECOND = 300;
+        public static double MAX_MOVEMENT_PER_SECOND = 100;
+        public static double MAX_ROTATION_PER_SECOND = 100;
 
         public static double[] MOTOR_PID = {1, 0, 0.0075};
 
@@ -46,6 +46,8 @@ public class Constants {
         public static String POIGNET_SERVO_NAME = "servoGrabberPoignet";
         public static String PINCE_SERVO_NAME = "servoGrabberPince";
         public static String GRABBER_DROP_LIMIT = "grabberDropLimit";
+        public static double POIGNET_SERVO_MIN_POSITION = 0;
+        public static double POIGNET_SERVO_MAX_POSITION = 0.75;
 
     }
     public static class ElevatorConstants {

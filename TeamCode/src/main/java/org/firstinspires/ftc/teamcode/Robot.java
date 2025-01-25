@@ -4,6 +4,7 @@ import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
+import org.firstinspires.ftc.teamcode.subsystems.Drive9axisIMU;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ElevatorSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.GlobalSubsystem;
@@ -11,7 +12,7 @@ import org.firstinspires.ftc.teamcode.subsystems.GrabberSubsystem;
 
 public class Robot extends OpMode {
     static final GlobalSubsystem robotGlobal = GlobalSubsystem.getInstance();
-    static final DriveSubsystem robotDrive = DriveSubsystem.getInstance();
+    static final Drive9axisIMU robotDrive = Drive9axisIMU.getInstance();
     static final GrabberSubsystem robotGrabber = GrabberSubsystem.getInstance();
     static final ElevatorSubsystem robotElevator = ElevatorSubsystem.getInstance();
     static GamepadEx pilotController;

@@ -11,14 +11,14 @@ public class Teleop extends Robot {
     @Override
     public void start() {
         robotDrive.setDefaultCommand(new RunCommand(() -> {
-            double movementSlowdown = 1 - pilotController.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) * 0.6;
-            movementSlowdown *= 1 - pilotController.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) * 0.4;
+            //double movementSlowdown = 1 - pilotController.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) * 0.6;
+            //movementSlowdown *= 1 - pilotController.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) * 0.4;
 
             robotDrive.drive(new ChassisSpeeds(
-                    pilotController.getLeftX() * movementSlowdown * Constants.DriveConstants.MAX_MOVEMENT_PER_SECOND,
-                    pilotController.getLeftY() * movementSlowdown * Constants.DriveConstants.MAX_MOVEMENT_PER_SECOND,
-                    pilotController.getRightX() * movementSlowdown * Constants.DriveConstants.MAX_ROTATION_PER_SECOND
-            ), true, robotGlobal.driverRotation);
+                    pilotController.getLeftY()  * Constants.DriveConstants.MAX_MOVEMENT_PER_SECOND,
+                    pilotController.getLeftX()  * Constants.DriveConstants.MAX_MOVEMENT_PER_SECOND,
+                    pilotController.getRightX()  * Constants.DriveConstants.MAX_ROTATION_PER_SECOND
+            ), false, robotGlobal.driverRotation);
 
             //if (pilotController.wasJustPressed(GamepadKeys.Button.START)) {
             //    robotDrive.resetPose(new Pose2d().rotate(-Math.PI * 1.5));
@@ -51,8 +51,8 @@ public class Teleop extends Robot {
 
             if (movementForwardGrabber || movementBackGrabber) {
                 robotGrabber.setGrabberPower(
-                        (movementBackGrabber ? -1 : 0) +
-                                (movementForwardGrabber ? 1 : 0)
+                        (movementBackGrabber ? -0.8 : 0) +
+                                (movementForwardGrabber ? 0.8 : 0)
                 );
             } else {
                 robotGrabber.stopGrabberPower();

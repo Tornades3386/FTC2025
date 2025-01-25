@@ -26,12 +26,11 @@ import org.firstinspires.ftc.teamcode.Constants.DriveConstants;
 public class DriveSubsystem extends SubsystemBase {
     private static final DriveSubsystem INSTANCE = new DriveSubsystem();
     private static final MecanumDriveOdometry odometry = new MecanumDriveOdometry(DriveConstants.DRIVE_KINEMATICS, new Rotation2d());
-    private static class Base {
-        private static MotorEx frontLeft;
-        private static MotorEx frontRight;
-        private static MotorEx rearLeft;
-        private static MotorEx rearRight;
-    }
+    private static MotorEx frontLeft;
+    private static MotorEx frontRight;
+    private static MotorEx rearLeft;
+    private static MotorEx rearRight;
+
 
     private final double teta = Math.toRadians(45);
     double epsilon = 0.00001;
@@ -42,8 +41,7 @@ public class DriveSubsystem extends SubsystemBase {
     boolean isPOV = false;
     private static ChassisSpeeds targetChassisSpeeds = new ChassisSpeeds();
 
-    Base base = new Base();
-    private DriveSubsystem() {
+     private DriveSubsystem() {
     }
 
     public static DriveSubsystem getInstance() {
@@ -68,10 +66,10 @@ public class DriveSubsystem extends SubsystemBase {
 //        imu.resetYaw();
         imu.reset();
 
-        Base.frontLeft = new MotorEx(globalSubsystem.hardwareMap, DriveConstants.FRONT_LEFT_MOTOR_NAME);
-        Base.frontRight = new MotorEx(globalSubsystem.hardwareMap, DriveConstants.FRONT_RIGHT_MOTOR_NAME);
-        Base.rearLeft = new MotorEx(globalSubsystem.hardwareMap, DriveConstants.REAR_LEFT_MOTOR_NAME);
-        Base.rearRight = new MotorEx(globalSubsystem.hardwareMap, DriveConstants.REAR_RIGHT_MOTOR_NAME);
+        frontLeft = new MotorEx(globalSubsystem.hardwareMap, DriveConstants.FRONT_LEFT_MOTOR_NAME);
+        frontRight = new MotorEx(globalSubsystem.hardwareMap, DriveConstants.FRONT_RIGHT_MOTOR_NAME);
+        rearLeft = new MotorEx(globalSubsystem.hardwareMap, DriveConstants.REAR_LEFT_MOTOR_NAME);
+        rearRight = new MotorEx(globalSubsystem.hardwareMap, DriveConstants.REAR_RIGHT_MOTOR_NAME);
 
         /*Base.frontLeft.setVeloCoefficients(DriveConstants.MOTOR_PID[0], DriveConstants.MOTOR_PID[1], DriveConstants.MOTOR_PID[2]);
         Base.frontRight.setVeloCoefficients(DriveConstants.MOTOR_PID[0], DriveConstants.MOTOR_PID[1], DriveConstants.MOTOR_PID[2]);
@@ -83,15 +81,15 @@ public class DriveSubsystem extends SubsystemBase {
         Base.rearLeft.setDistancePerPulse(DriveConstants.TICKS_TO_DISTANCE_INVERSE);
         Base.rearRight.setDistancePerPulse(DriveConstants.TICKS_TO_DISTANCE_INVERSE);*/
 
-        Base.frontLeft.setRunMode(Motor.RunMode.RawPower);
-        Base.frontRight.setRunMode(Motor.RunMode.RawPower);
-        Base.rearLeft.setRunMode(Motor.RunMode.RawPower);
-        Base.rearRight.setRunMode(Motor.RunMode.RawPower);
+        frontLeft.setRunMode(Motor.RunMode.RawPower);
+        frontRight.setRunMode(Motor.RunMode.RawPower);
+        rearLeft.setRunMode(Motor.RunMode.RawPower);
+        rearRight.setRunMode(Motor.RunMode.RawPower);
 
-        Base.frontLeft.setZeroPowerBehavior(MotorEx.ZeroPowerBehavior.BRAKE);
-        Base.frontLeft.setZeroPowerBehavior(MotorEx.ZeroPowerBehavior.BRAKE);
-        Base.frontLeft.setZeroPowerBehavior(MotorEx.ZeroPowerBehavior.BRAKE);
-        Base.frontLeft.setZeroPowerBehavior(MotorEx.ZeroPowerBehavior.BRAKE);
+        frontLeft.setZeroPowerBehavior(MotorEx.ZeroPowerBehavior.BRAKE);
+        frontLeft.setZeroPowerBehavior(MotorEx.ZeroPowerBehavior.BRAKE);
+        frontLeft.setZeroPowerBehavior(MotorEx.ZeroPowerBehavior.BRAKE);
+        frontLeft.setZeroPowerBehavior(MotorEx.ZeroPowerBehavior.BRAKE);
 
 
         /*frontLeft.setRunMode(Motor.RunMode.VelocityControl);
