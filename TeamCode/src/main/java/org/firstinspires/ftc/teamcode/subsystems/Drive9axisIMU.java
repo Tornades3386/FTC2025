@@ -1,28 +1,21 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.arcrobotics.ftclib.command.SubsystemBase;
-import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.arcrobotics.ftclib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.arcrobotics.ftclib.kinematics.wpilibkinematics.MecanumDriveOdometry;
-import com.arcrobotics.ftclib.kinematics.wpilibkinematics.MecanumDriveWheelSpeeds;
-import com.qualcomm.hardware.rev.Rev9AxisImuOrientationOnRobot;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.ImuOrientationOnRobot;
 
-import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.Constants;
-import org.firstinspires.ftc.teamcode.RevIMU;
 
 public class Drive9axisIMU extends SubsystemBase {
     private static final Drive9axisIMU INSTANCE = new Drive9axisIMU();
@@ -33,7 +26,11 @@ public class Drive9axisIMU extends SubsystemBase {
     private ImuOrientationOnRobot orientationOnRobot;
     private YawPitchRollAngles orientation;
     AngularVelocity angularVelocity;
-    private double botHeading, rotX, rotY, rx, denominator, frontLeftPower, backLeftPower, frontRightPower, backRightPower;
+    private double botHeading;
+    private double frontLeftPower;
+    private double backLeftPower;
+    private double frontRightPower;
+    private double backRightPower;
     private static MotorEx frontLeft;
     private static MotorEx frontRight;
     private static MotorEx rearLeft;
@@ -54,7 +51,7 @@ public class Drive9axisIMU extends SubsystemBase {
         //orientationOnRobot = new Rev9AxisImuOrientationOnRobot(Rev9AxisImuOrientationOnRobot.LogoFacingDirection.UP, Rev9AxisImuOrientationOnRobot.I2cPortFacingDirection.FORWARD);
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
         RevHubOrientationOnRobot.LogoFacingDirection.UP,
-        RevHubOrientationOnRobot.I2cPortFacingDirection.FORWARD));
+        RevHubOrientationOnRobot.UsbFacingDirection.RIGHT));
         // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
         imu.initialize(parameters);
         //imu = new RevIMU(hardwareMap, "navx");
@@ -79,23 +76,26 @@ public class Drive9axisIMU extends SubsystemBase {
         rearRight.setZeroPowerBehavior(MotorEx.ZeroPowerBehavior.BRAKE);
 
     }
-    public void drive(ChassisSpeeds chassisSpeeds, boolean fieldRelative) {
-        if (fieldRelative == false){
-            rotX = chassisSpeeds.vxMetersPerSecond
-            rotY = chassisSpeeds.vyMetersPerSecond
-            rx = chassisSpeeds.omegaRadiansPerSecond
-            givePower(rotX, rotY, rx)
+    public void drive(double letfY, double LeftX, double RightX, boolean fieldRelative) {
+        double rx;
+        double rotY;
+        double rotX;
+        if (!fieldRelative){
+            rotX = LeftX * 1.1;
+            rotY = -letfY;
+            rx = RightX;
+            givePower(rotX, rotY, rx);
 
         }else{
-            rotX = (chassisSpeeds.vxMetersPerSecond * MAth.cos(-botHeading) - chassisSpeeds.vyMetersPerSecond * Math.sin(-botHeading))*1.1
-            rotY = chassisSpeeds.vyMetersPerSecond * Math.sin(-botHeading) + chassisSpeeds.vxMetersPerSecond * MAth.cos(-botHeading)
-            rx = chassisSpeeds.omegaRadiansPerSecond
-            givePower(rotX, rotY, rx)
+            rotX = (LeftX* Math.cos(-botHeading) - letfY * Math.sin(-botHeading)) *1.1;
+            rotY = -(letfY * Math.sin(-botHeading) + LeftX * Math.cos(-botHeading));
+            rx = RightX;
+            givePower(rotX, rotY, rx);
         }
     }
 
-    public void givePower(rotX, rotY, rx){
-        denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
+    public void givePower(double rotX, double rotY, double rx){
+        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
         frontLeftPower = (rotY + rotX + rx) / denominator;
         backLeftPower = (rotY - rotX + rx) / denominator;
         frontRightPower = (rotY - rotX - rx) / denominator;
@@ -112,10 +112,10 @@ public class Drive9axisIMU extends SubsystemBase {
         angularVelocity = imu.getRobotAngularVelocity(AngleUnit.RADIANS);
         botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
-        frontLeft.setPower(frontLeftPower);
-        rearLeft.setPower(backLeftPower);
-        frontRight.setPower(frontRightPower);
-        rearRight.setPower(backRightPower);
+        frontLeft.set(frontLeftPower);
+        rearLeft.set(backLeftPower);
+        frontRight.set(frontRightPower);
+        rearRight.set(backRightPower);
 
 
         /*telemetry.addData("Yaw (Z)", JavaUtil.formatNumber(orientation.getYaw(AngleUnit.RADIANS), 2) + " Deg. (Heading)");

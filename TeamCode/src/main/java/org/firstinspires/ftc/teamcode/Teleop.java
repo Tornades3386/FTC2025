@@ -11,14 +11,17 @@ public class Teleop extends Robot {
     @Override
     public void start() {
         robotDrive.setDefaultCommand(new RunCommand(() -> {
-            //double movementSlowdown = 1 - pilotController.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) * 0.6;
-            //movementSlowdown *= 1 - pilotController.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) * 0.4;
+            if ( pilotController.isDown(GamepadKeys.Button.LEFT_STICK_BUTTON) ) {
+                double movementSlowdown = 0.6;
+            }else {
+                double movementSlowdown = 1;
+            }
 
-            robotDrive.drive(new ChassisSpeeds(
-                    -pilotController.getLeftY()  *0.4,
-                    pilotController.getLeftX()  *0.4,
-                    pilotController.getRightX()
-            ), false);
+            robotDrive.drive(
+                    pilotController.getLeftY()  *0.8,
+                    pilotController.getLeftX()  *0.8,
+                    pilotController.getRightX() *0.8,
+                    false);
 
             //if (pilotController.wasJustPressed(GamepadKeys.Button.START)) {
             //    robotDrive.resetPose(new Pose2d().rotate(-Math.PI * 1.5));
