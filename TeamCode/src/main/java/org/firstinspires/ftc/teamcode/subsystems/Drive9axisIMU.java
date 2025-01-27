@@ -33,6 +33,7 @@ public class Drive9axisIMU extends SubsystemBase {
     private ImuOrientationOnRobot orientationOnRobot;
     private YawPitchRollAngles orientation;
     AngularVelocity angularVelocity;
+    private double botHeading, rotX, rotY, rx, denominator, frontLeftPower, backLeftPower, frontRightPower, backRightPower;
     private static MotorEx frontLeft;
     private static MotorEx frontRight;
     private static MotorEx rearLeft;
@@ -49,50 +50,59 @@ public class Drive9axisIMU extends SubsystemBase {
         GlobalSubsystem globalSubsystem = GlobalSubsystem.getInstance();
         HardwareMap hardwareMap = GlobalSubsystem.getInstance().hardwareMap;
 
-
-        orientationOnRobot = new Rev9AxisImuOrientationOnRobot(Rev9AxisImuOrientationOnRobot.LogoFacingDirection.UP, Rev9AxisImuOrientationOnRobot.I2cPortFacingDirection.RIGHT);
         imu = hardwareMap.get(IMU.class, "imu");
+        //orientationOnRobot = new Rev9AxisImuOrientationOnRobot(Rev9AxisImuOrientationOnRobot.LogoFacingDirection.UP, Rev9AxisImuOrientationOnRobot.I2cPortFacingDirection.FORWARD);
+        IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
+        RevHubOrientationOnRobot.LogoFacingDirection.UP,
+        RevHubOrientationOnRobot.I2cPortFacingDirection.FORWARD));
+        // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
+        imu.initialize(parameters);
         //imu = new RevIMU(hardwareMap, "navx");
         imu.resetYaw();
 
-        orientation = imu.getRobotYawPitchRollAngles();
-        angularVelocity = imu.getRobotAngularVelocity(AngleUnit.RADIANS);
+        botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
         frontLeft = new MotorEx(globalSubsystem.hardwareMap, Constants.DriveConstants.FRONT_LEFT_MOTOR_NAME);
         frontRight = new MotorEx(globalSubsystem.hardwareMap, Constants.DriveConstants.FRONT_RIGHT_MOTOR_NAME);
         rearLeft = new MotorEx(globalSubsystem.hardwareMap, Constants.DriveConstants.REAR_LEFT_MOTOR_NAME);
         rearRight = new MotorEx(globalSubsystem.hardwareMap, Constants.DriveConstants.REAR_RIGHT_MOTOR_NAME);
 
-        frontLeft.setVeloCoefficients(Constants.DriveConstants.MOTOR_PID[0], Constants.DriveConstants.MOTOR_PID[1], Constants.DriveConstants.MOTOR_PID[2]);
-        frontRight.setVeloCoefficients(Constants.DriveConstants.MOTOR_PID[0], Constants.DriveConstants.MOTOR_PID[1], Constants.DriveConstants.MOTOR_PID[2]);
-        rearLeft.setVeloCoefficients(Constants.DriveConstants.MOTOR_PID[0], Constants.DriveConstants.MOTOR_PID[1], Constants.DriveConstants.MOTOR_PID[2]);
-        rearRight.setVeloCoefficients(Constants.DriveConstants.MOTOR_PID[0], Constants.DriveConstants.MOTOR_PID[1], Constants.DriveConstants.MOTOR_PID[2]);
+        frontLeft.setRunMode(Motor.RunMode.RawPower);
+        frontRight.setRunMode(Motor.RunMode.RawPower);
+        rearLeft.setRunMode(Motor.RunMode.RawPower);
+        rearRight.setRunMode(Motor.RunMode.RawPower);
+        
 
-        frontLeft.setDistancePerPulse(Constants.DriveConstants.TICKS_TO_DISTANCE_INVERSE);
-        frontRight.setDistancePerPulse(Constants.DriveConstants.TICKS_TO_DISTANCE_INVERSE);
-        rearLeft.setDistancePerPulse(Constants.DriveConstants.TICKS_TO_DISTANCE_INVERSE);
-        rearRight.setDistancePerPulse(Constants.DriveConstants.TICKS_TO_DISTANCE_INVERSE);
-
-        frontLeft.setRunMode(Motor.RunMode.VelocityControl);
-        frontRight.setRunMode(Motor.RunMode.VelocityControl);
-        rearLeft.setRunMode(Motor.RunMode.VelocityControl);
-        rearRight.setRunMode(Motor.RunMode.VelocityControl);
+        frontLeft.setZeroPowerBehavior(MotorEx.ZeroPowerBehavior.BRAKE);
+        frontRight.setZeroPowerBehavior(MotorEx.ZeroPowerBehavior.BRAKE);
+        rearLeft.setZeroPowerBehavior(MotorEx.ZeroPowerBehavior.BRAKE);
+        rearRight.setZeroPowerBehavior(MotorEx.ZeroPowerBehavior.BRAKE);
 
     }
-    public void drive(ChassisSpeeds chassisSpeeds, boolean fieldRelative, Rotation2d rotateBy) {
-        targetChassisSpeeds = fieldRelative ?
-                fromFieldRelativeSpeeds(
-                        chassisSpeeds, odometry.getPoseMeters().getRotation().plus(rotateBy))
-                : chassisSpeeds;
+    public void drive(ChassisSpeeds chassisSpeeds, boolean fieldRelative) {
+        if (fieldRelative == false){
+            rotX = chassisSpeeds.vxMetersPerSecond
+            rotY = chassisSpeeds.vyMetersPerSecond
+            rx = chassisSpeeds.omegaRadiansPerSecond
+            givePower(rotX, rotY, rx)
+
+        }else{
+            rotX = (chassisSpeeds.vxMetersPerSecond * MAth.cos(-botHeading) - chassisSpeeds.vyMetersPerSecond * Math.sin(-botHeading))*1.1
+            rotY = chassisSpeeds.vyMetersPerSecond * Math.sin(-botHeading) + chassisSpeeds.vxMetersPerSecond * MAth.cos(-botHeading)
+            rx = chassisSpeeds.omegaRadiansPerSecond
+            givePower(rotX, rotY, rx)
+        }
     }
 
-    private ChassisSpeeds fromFieldRelativeSpeeds(ChassisSpeeds chassisSpeeds, Rotation2d rotateBy) {
-        return new ChassisSpeeds(
-                chassisSpeeds.vxMetersPerSecond * rotateBy.getCos() - chassisSpeeds.vyMetersPerSecond * rotateBy.getSin(),
-                chassisSpeeds.vyMetersPerSecond * rotateBy.getCos() + chassisSpeeds.vxMetersPerSecond * rotateBy.getSin(),
-                chassisSpeeds.omegaRadiansPerSecond
-        );
+    public void givePower(rotX, rotY, rx){
+        denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
+        frontLeftPower = (rotY + rotX + rx) / denominator;
+        backLeftPower = (rotY - rotX + rx) / denominator;
+        frontRightPower = (rotY - rotX - rx) / denominator;
+        backRightPower = (rotY + rotX - rx) / denominator;
     }
+
+
 
     @Override
     public void periodic() {
@@ -100,7 +110,15 @@ public class Drive9axisIMU extends SubsystemBase {
         telemetry.addLine("");
         orientation = imu.getRobotYawPitchRollAngles();
         angularVelocity = imu.getRobotAngularVelocity(AngleUnit.RADIANS);
-        telemetry.addData("Yaw (Z)", JavaUtil.formatNumber(orientation.getYaw(AngleUnit.RADIANS), 2) + " Deg. (Heading)");
+        botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+
+        frontLeft.setPower(frontLeftPower);
+        rearLeft.setPower(backLeftPower);
+        frontRight.setPower(frontRightPower);
+        rearRight.setPower(backRightPower);
+
+
+        /*telemetry.addData("Yaw (Z)", JavaUtil.formatNumber(orientation.getYaw(AngleUnit.RADIANS), 2) + " Deg. (Heading)");
         telemetry.addData("Pitch (X)", JavaUtil.formatNumber(orientation.getPitch(AngleUnit.RADIANS), 2) + " Deg.");
         telemetry.addData("Roll (Y)", JavaUtil.formatNumber(orientation.getRoll(AngleUnit.RADIANS), 2) + " Deg.");
         telemetry.addLine("");
@@ -148,7 +166,7 @@ public class Drive9axisIMU extends SubsystemBase {
                 frontRight.getVelocity() * Constants.DriveConstants.DISTANCE_TO_TICKS,
                 rearLeft.getVelocity() * Constants.DriveConstants.DISTANCE_TO_TICKS,
                 rearRight.getVelocity() * Constants.DriveConstants.DISTANCE_TO_TICKS
-        );
+        );*/
 
         /*odometry.updateWithTime(
                 GlobalSubsystem.getInstance().elapsedTime.seconds(),
