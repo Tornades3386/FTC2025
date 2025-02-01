@@ -51,7 +51,7 @@ public class Drive9axisIMU extends SubsystemBase {
         //orientationOnRobot = new Rev9AxisImuOrientationOnRobot(Rev9AxisImuOrientationOnRobot.LogoFacingDirection.UP, Rev9AxisImuOrientationOnRobot.I2cPortFacingDirection.FORWARD);
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                RevHubOrientationOnRobot.UsbFacingDirection.RIGHT));
+                RevHubOrientationOnRobot.UsbFacingDirection.LEFT));
         // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
         imu.initialize(parameters);
         //imu = new RevIMU(hardwareMap, "navx");
@@ -63,6 +63,12 @@ public class Drive9axisIMU extends SubsystemBase {
         frontRight = new MotorEx(globalSubsystem.hardwareMap, Constants.DriveConstants.FRONT_RIGHT_MOTOR_NAME);
         rearLeft = new MotorEx(globalSubsystem.hardwareMap, Constants.DriveConstants.REAR_LEFT_MOTOR_NAME);
         rearRight = new MotorEx(globalSubsystem.hardwareMap, Constants.DriveConstants.REAR_RIGHT_MOTOR_NAME);
+
+        frontLeft.setInverted(true);
+        rearLeft.setInverted(true);
+        //frontRight.setInverted(true);
+        //rearRight.setInverted(true);
+        // try this
 
         frontLeft.setRunMode(Motor.RunMode.RawPower);
         frontRight.setRunMode(Motor.RunMode.RawPower);
@@ -76,21 +82,22 @@ public class Drive9axisIMU extends SubsystemBase {
         rearRight.setZeroPowerBehavior(MotorEx.ZeroPowerBehavior.BRAKE);
 
     }
-    public void drive(double letfY, double LeftX, double RightX, boolean fieldRelative) {
+    public void drive(double leftY, double leftX, double rightX, boolean fieldRelative) {
         double rx;
         double rotY;
         double rotX;
-        letfY = -letfY;
+        //leftY = -leftY;
+
         if (!fieldRelative){
-            rotX = LeftX * 1.1;
-            rotY = letfY;
+            rotX = leftX * 1.1;
+            rotY = leftY;
 
         }else{
-            rotX = LeftX * Math.cos(-botHeading) - letfY * Math.sin(-botHeading);
-            rotY = letfY * Math.sin(-botHeading) + LeftX * Math.cos(-botHeading);
+            rotX = leftX * Math.cos(-botHeading) - leftY * Math.sin(-botHeading);
+            rotY = leftX * Math.sin(-botHeading) + leftY * Math.cos(-botHeading);
             rotX = rotX * 1.1;
         }
-        rx = RightX;
+        rx = rightX;
         givePower(rotX, rotY, rx);
     }
 

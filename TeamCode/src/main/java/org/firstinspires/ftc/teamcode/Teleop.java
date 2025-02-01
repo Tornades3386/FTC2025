@@ -21,7 +21,7 @@ public class Teleop extends Robot {
                     pilotController.getLeftY()  *0.8,
                     pilotController.getLeftX()  *0.8,
                     pilotController.getRightX() *0.8,
-                    false);
+                    true);
 
             //if (pilotController.wasJustPressed(GamepadKeys.Button.START)) {
             //    robotDrive.resetPose(new Pose2d().rotate(-Math.PI * 1.5));
@@ -37,20 +37,12 @@ public class Teleop extends Robot {
                 movementBackGrabber = true;
             }
 
-            if (pilotController.wasJustReleased(GamepadKeys.Button.X)) {
-                robotGrabber.setPoignetPrinceSpeed(
-                );
-            } /*else if (pilotController.wasJustReleased(GamepadKeys.Button.X) || pilotController.wasJustReleased(GamepadKeys.Button.A)) {
-            robotGrabber.stopPrinceSpeed();
+            if (pilotController.isDown(GamepadKeys.Button.X)) {
+                robotGrabber.setGrabberMiddle();
 
-        }*/
-
-            /*if (pilotController.isDown(GamepadKeys.Button.Y) || pilotController.isDown(GamepadKeys.Button.B)) {
-                robotGrabber.setPoignetSpeed(
-                        (pilotController.isDown(GamepadKeys.Button.Y) ? 0.1 : 0)+
-                                (pilotController.isDown(GamepadKeys.Button.B) ? -0.1: 0)
-            );}/*else if (pilotController.wasJustReleased(GamepadKeys.Button.Y) || pilotController.wasJustReleased(GamepadKeys.Button.B)) {
-            robotGrabber.stop();*/
+            }else if (pilotController.wasJustReleased(GamepadKeys.Button.X) ) {
+                robotGrabber.setPoignetPrinceSpeed();
+            }
 
             if (movementForwardGrabber || movementBackGrabber) {
                 robotGrabber.setGrabberPower(
@@ -60,17 +52,37 @@ public class Teleop extends Robot {
             } else {
                 robotGrabber.stopGrabberPower();
             }
+
+            if (pilotController.isDown(GamepadKeys.Button.Y)){
+                robotGrabber.vomit();
+            }
+            if (pilotController.wasJustReleased(GamepadKeys.Button.DPAD_UP)){
+                robotGrabber.startClimb();
+            }
         }, robotGrabber));
 
         robotElevator.setDefaultCommand(new RunCommand(()->{
-            if (pilotController.isDown(GamepadKeys.Button.DPAD_UP) || pilotController.isDown(GamepadKeys.Button.DPAD_DOWN)) {
+            if (pilotController.isDown(GamepadKeys.Button.RIGHT_BUMPER) || pilotController.isDown(GamepadKeys.Button.LEFT_BUMPER) || copilotController.isDown(GamepadKeys.Button.LEFT_BUMPER) || copilotController.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
                 robotElevator.setElevator(
-                        (pilotController.isDown(GamepadKeys.Button.DPAD_UP) ? 1 : 0) +
-                                (pilotController.isDown(GamepadKeys.Button.DPAD_DOWN) ? -1 : 0)
+                        (pilotController.isDown(GamepadKeys.Button.RIGHT_BUMPER) ? 1 : 0) +
+                                (pilotController.isDown(GamepadKeys.Button.LEFT_BUMPER) ? -1 : 0)
                 );
-            } else if (pilotController.wasJustReleased(GamepadKeys.Button.DPAD_UP) || pilotController.wasJustReleased(GamepadKeys.Button.DPAD_DOWN)) {
+            } else if (pilotController.wasJustReleased(GamepadKeys.Button.RIGHT_BUMPER) || pilotController.wasJustReleased(GamepadKeys.Button.LEFT_BUMPER) || copilotController.isDown(GamepadKeys.Button.LEFT_BUMPER) || copilotController.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
                 robotElevator.stopElevator();
             }
+            if (pilotController.isDown(GamepadKeys.Button.X)) {
+                 robotElevator.setPoignet();
+            }
+            if (pilotController.isDown(GamepadKeys.Button.RIGHT_STICK_BUTTON) || copilotController.isDown(GamepadKeys.Button.RIGHT_STICK_BUTTON)){
+                robotElevator.setPince();
+            }
+            if (pilotController.isDown(GamepadKeys.Button.RIGHT_STICK_BUTTON) || copilotController.isDown(GamepadKeys.Button.RIGHT_STICK_BUTTON)){
+                robotElevator.setCoude();
+            }
+            if (pilotController.wasJustReleased(GamepadKeys.Button.DPAD_UP)){
+                robotElevator.startClimb();
+            }
+
         },robotElevator));
     }
 }

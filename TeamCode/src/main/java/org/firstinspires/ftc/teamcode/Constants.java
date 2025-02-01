@@ -48,14 +48,26 @@ public class Constants {
         public static String GRABBER_DROP_LIMIT = "grabberDropLimit";
         public static double POIGNET_SERVO_MIN_POSITION = 0;
         public static double POIGNET_SERVO_MAX_POSITION = 0.75;
+        public static double POIGNET_SERVO_MID_POSITION = 0.35;
 
     }
     public static class ElevatorConstants {
         public static String ELEVATOR_LEFT_MOTOR_NAME = "leftElevator";
         public static String ELEVATOR_RIGHT_MOTOR_NAME = "rightElevator";
         public static String ELEVATOR_DOWN_LIMIT = "downElevator";
-        public static String ELEVATOR_0_SERVO_NAME = "elevator0";
-        public static String ELEVATOR_1_SERVO_NAME = "elevator1";
-        public static String ELEVATOR_2_SERVO_NAME = "elevator2";
+        public static String ELEVATOR_PINCE_SERVO_NAME = "elevator0";
+        public static String ELEVATOR_COUDE_SERVO_NAME = "elevator1";
+        public static String ELEVATOR_POIGNET_SERVO_NAME = "elevator2";
+
+        public static double PINCE_SERVO_MIN_POSITION = 0.17;
+        public static double PINCE_SERVO_MAX_POSITION = 0.25;
+
+        public static double COUDE_SERVO_MIN_POSITION = 0.17;
+        public static double COUDE_SERVO_MAX_POSITION = 1;
+
+        public static double POIGNET_SERVO_MIN_POSITION = 0.83;
+        public static double POIGNET_SERVO_MAX_POSITION = 0.93;
+
+
     }
 }

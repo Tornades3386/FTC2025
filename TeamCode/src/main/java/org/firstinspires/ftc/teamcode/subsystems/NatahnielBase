@@ -134,7 +134,7 @@ public class RymaPov extends LinearOpMode {
             
             //yawm math
             rotX = lateral * Math.cos(-botHeading) - axial * Math.sin(-botHeading);
-            rotY = -(axial * Math.sin(-botHeading) + lateral * Math.cos(-botHeading));
+            rotY = axial * Math.sin(-botHeading) + lateral * Math.cos(-botHeading);
             rotX = rotX * 1.1;
             rx = yaw;
             
