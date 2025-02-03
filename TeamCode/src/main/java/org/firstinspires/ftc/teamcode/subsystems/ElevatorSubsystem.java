@@ -87,9 +87,18 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public void setElevator(double power) {
 
-        if (power<0 & !elevatorDownLimit.getState()) {
+        if (power<0 && !elevatorDownLimit.getState()) {
             elevatorMotors.stopMotor();
-        }else{
+        }else if (power > 0 && !elevatorDownLimit.getState()) {
+            ElPinceServoCurrentPosition = PINCE_SERVO_MIN_POSITION;
+            elevatorMotors.set(power);
+            PinceZero = false;
+        }
+        else if (power <0 && elevatorRightMotorEncoder.getCurrentPosition() < 50){
+            elevatorMotors.set(power/1.3);
+            ElCoudeServoCurrentPosition = COUDE_SERVO_MIN_POSITION;
+            CoudeZero = false;
+        }else {
             elevatorMotors.set(power);
         }
 
@@ -123,10 +132,10 @@ public class ElevatorSubsystem extends SubsystemBase {
     public void setCoude() {
         if (!CoudeZero){
             ElCoudeServoCurrentPosition = COUDE_SERVO_MAX_POSITION;
-            PinceZero = true;
+            CoudeZero = true;
         }else{
             ElCoudeServoCurrentPosition = COUDE_SERVO_MIN_POSITION;
-            PinceZero = false;
+            CoudeZero = false;
         }
     }
 
@@ -141,23 +150,23 @@ public class ElevatorSubsystem extends SubsystemBase {
         ElCoudeServo.setPosition(ElCoudeServoCurrentPosition);
         ElPoignetServo.setPosition(ElPoignetServoCurrentPosition);
 
-        if (resetElevator && elevatorRightMotorEncoder.getCurrentPosition() < 50){
-            ElCoudeServoCurrentPosition = COUDE_SERVO_MIN_POSITION;
-        }
+
         if (!elevatorDownLimit.getState()) {
+            elevatorMotors.stopMotor();
             elevatorRightMotor.resetEncoder();
             resetElevator = true;
-            elevatorMotors.stopMotor();
+
         }
 
     }
 
 
-    public void startClimb() {
+    public boolean startClimb() {
         ElCoudeServoCurrentPosition = COUDE_SERVO_MIN_POSITION;
         // Grabber Goes to limit switch and poignet goes up
-        elevatorMotors.set(-0.4);
+        if (elevatorDownLimit.getState()){
+            elevatorMotors.set(-0.4);}
         //Elevator Goes up
-
+        return true;
     }
 }

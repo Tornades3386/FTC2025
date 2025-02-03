@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.arcrobotics.ftclib.command.Command;
+import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
@@ -12,16 +14,17 @@ public class Teleop extends Robot {
     @Override
     public void start() {
         robotDrive.setDefaultCommand(new RunCommand(() -> {
+            double movementSlowdown;
             if ( pilotController.isDown(GamepadKeys.Button.LEFT_STICK_BUTTON) ) {
-                double movementSlowdown = 0.6;
+                movementSlowdown = 0.6;
             }else {
-                double movementSlowdown = 1;
+                movementSlowdown = 1;
             }
 
             robotDrive.drive(
-                    pilotController.getLeftY()  *0.8,
-                    pilotController.getLeftX()  *0.8,
-                    pilotController.getRightX() *0.8,
+                    pilotController.getLeftY()  * movementSlowdown,
+                    pilotController.getLeftX()  * movementSlowdown,
+                    pilotController.getRightX() * movementSlowdown,
                     true);
 
             //if (pilotController.wasJustPressed(GamepadKeys.Button.START)) {
@@ -30,13 +33,7 @@ public class Teleop extends Robot {
         }, robotDrive));
 
         robotGrabber.setDefaultCommand(new RunCommand(() -> {
-            boolean movementForwardGrabber = false;
-            boolean movementBackGrabber = false;
-            if (pilotController.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0) {
-                movementForwardGrabber = true;
-            } else if (pilotController.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0) {
-                movementBackGrabber = true;
-            }
+
 
             if (pilotController.isDown(GamepadKeys.Button.X)) {
                 robotGrabber.setGrabberMiddle();
@@ -45,10 +42,10 @@ public class Teleop extends Robot {
                 robotGrabber.setPoignetPrinceSpeed();
             }
 
-            if (movementForwardGrabber || movementBackGrabber) {
+            if (pilotController.isDown(GamepadKeys.Button.RIGHT_BUMPER) || pilotController.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
                 robotGrabber.setGrabberPower(
-                        (movementBackGrabber ? -0.8 : 0) +
-                                (movementForwardGrabber ? 0.8 : 0)
+                        (pilotController.isDown(GamepadKeys.Button.LEFT_BUMPER) ? -0.8 : 0) +
+                                (pilotController.isDown(GamepadKeys.Button.RIGHT_BUMPER) ? 0.8 : 0)
                 );
             } else {
                 robotGrabber.stopGrabberPower();
@@ -63,14 +60,24 @@ public class Teleop extends Robot {
         }, robotGrabber));
 
         robotElevator.setDefaultCommand(new RunCommand(()->{
-            if (pilotController.isDown(GamepadKeys.Button.RIGHT_BUMPER) || pilotController.isDown(GamepadKeys.Button.LEFT_BUMPER) || copilotController.isDown(GamepadKeys.Button.LEFT_BUMPER) || copilotController.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
+
+            boolean movementUpElevator = false;
+            boolean movementDownElevator = false;
+            if (pilotController.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0 || copilotController.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) >0) {
+                movementUpElevator = true;
+            } else if (pilotController.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0 || copilotController.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)>0) {
+                movementDownElevator = true;
+            }
+
+            if (movementUpElevator || movementDownElevator) {
                 robotElevator.setElevator(
-                        (pilotController.isDown(GamepadKeys.Button.RIGHT_BUMPER) ? 1 : 0) +
-                                (pilotController.isDown(GamepadKeys.Button.LEFT_BUMPER) ? -1 : 0)
+                        (movementUpElevator ? 1 : 0) +
+                                (movementDownElevator ? -1 : 0)
                 );
-            } else if (pilotController.wasJustReleased(GamepadKeys.Button.RIGHT_BUMPER) || pilotController.wasJustReleased(GamepadKeys.Button.LEFT_BUMPER) || copilotController.isDown(GamepadKeys.Button.LEFT_BUMPER) || copilotController.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
+            } else {
                 robotElevator.stopElevator();
             }
+
             if (pilotController.wasJustReleased(GamepadKeys.Button.B)) {
                  robotElevator.setPoignet();
             }
@@ -87,27 +94,36 @@ public class Teleop extends Robot {
         // when button dpad_up is pressed
         // execute command
         pilotController.getGamepadButton(GamepadKeys.Button.DPAD_UP)
-                .whenReleased(new RunCommand(
+                .whileHeld(new RunCommand(
                         () -> {
                             robotGrabber.startClimb();
                             robotElevator.startClimb();
                         }, robotElevator, robotGrabber
-                ).andThen());
+                ).andThen(
+                        new RunCommand(
+                                () -> {
+                                    robotDrive.startClimb(0.8);
+                                    robotGrabber.extendSlides(0.8);
+                                },robotDrive, robotGrabber
+                )));
 
-        // when both up and down are pressed (example)
-        //
+        pilotController.getGamepadButton(GamepadKeys.Button.DPAD_UP)
+                .whileHeld(new RunCommand(
+                        () -> {
+                            robotGrabber.startClimb();
+                            robotElevator.startClimb();
+                        }, robotElevator, robotGrabber
+                ).andThen(
+                        new RunCommand(
+                                () -> {
+                                    //robotDrive.startClimb(0.1);
+                                    robotGrabber.extendSlides(-1);
+                                },robotDrive, robotGrabber
+                        )));
         /*pilotController.getGamepadButton(GamepadKeys.Button.DPAD_UP).and(
                 pilotController.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed()
         )*/
 
-        // btw maybe not RunCommand since it runs infinitely
-        // you can use the InstantCommand for a thing that runs once
-        // got it?
-        // yup
-        // welp gl on this friendly competition
-        // hopefully i'd have time to help next week before feb 8
-        // <3 good luck in school
-        // tyyyyy
-        // bye
+
     }
 }

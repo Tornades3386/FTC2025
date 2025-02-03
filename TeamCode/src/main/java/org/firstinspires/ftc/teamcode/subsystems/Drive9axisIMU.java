@@ -4,6 +4,7 @@ import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
+import com.arcrobotics.ftclib.hardware.motors.MotorGroup;
 import com.arcrobotics.ftclib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.arcrobotics.ftclib.kinematics.wpilibkinematics.MecanumDriveOdometry;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -35,6 +36,7 @@ public class Drive9axisIMU extends SubsystemBase {
     private static MotorEx frontRight;
     private static MotorEx rearLeft;
     private static MotorEx rearRight;
+    private static MotorGroup rearMotors;
     private static ChassisSpeeds targetChassisSpeeds = new ChassisSpeeds();
 
     private Drive9axisIMU() {
@@ -63,6 +65,8 @@ public class Drive9axisIMU extends SubsystemBase {
         frontRight = new MotorEx(globalSubsystem.hardwareMap, Constants.DriveConstants.FRONT_RIGHT_MOTOR_NAME);
         rearLeft = new MotorEx(globalSubsystem.hardwareMap, Constants.DriveConstants.REAR_LEFT_MOTOR_NAME);
         rearRight = new MotorEx(globalSubsystem.hardwareMap, Constants.DriveConstants.REAR_RIGHT_MOTOR_NAME);
+
+        rearMotors = new MotorGroup(rearLeft,rearRight);
 
         frontLeft.setInverted(true);
         rearLeft.setInverted(true);
@@ -108,6 +112,11 @@ public class Drive9axisIMU extends SubsystemBase {
         frontRightPower = (rotY - rotX - rx) / denominator;
         backRightPower = (rotY + rotX - rx) / denominator;
     }
+
+    public void startClimb(double power) {
+        rearMotors.set(power);
+    }
+
 
 
 
@@ -207,5 +216,6 @@ public class Drive9axisIMU extends SubsystemBase {
 
         telemetry.addData("Drive: Estimated Pose", odometryPose);*/
     }
+
 
 }
