@@ -195,7 +195,15 @@ public class GrabberSubsystem extends SubsystemBase {
     }
 
     public void startClimb(){
-        startClimb = true;
+        currentPosition = POIGNET_SERVO_MAX_POSITION;
+        while (grabberLeftMotor.getCurrentPosition() >= -50 && grabberLeftMotor.getCurrentPosition() <=50) {
+            if (grabberLeftMotor.getCurrentPosition() > 10) {
+                slideMotors.set(-0.4);
+            } else if (grabberLeftMotor.getCurrentPosition() < 10) {
+                slideMotors.set(0.4);
+            }
+        }
+
     }
 
 
@@ -217,7 +225,6 @@ public class GrabberSubsystem extends SubsystemBase {
         poignetServo.setPosition(currentPosition);
 
         if (!grabberDropLimit.getState()){
-            grabberRightMotor.resetEncoder();
             grabberLeftMotor.resetEncoder();
         }
         if(grabberLeftMotor.getCurrentPosition() < -50){
@@ -235,5 +242,9 @@ public class GrabberSubsystem extends SubsystemBase {
             }
         }
 
+    }
+
+    public void stopPince() {
+        pinceServo.setPower(0);
     }
 }

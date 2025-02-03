@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.arcrobotics.ftclib.command.RunCommand;
+import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.kinematics.wpilibkinematics.ChassisSpeeds;
@@ -55,10 +56,10 @@ public class Teleop extends Robot {
 
             if (pilotController.isDown(GamepadKeys.Button.Y)){
                 robotGrabber.vomit();
+            }else {
+                robotGrabber.stopPince();
             }
-            if (pilotController.wasJustReleased(GamepadKeys.Button.DPAD_UP)){
-                robotGrabber.startClimb();
-            }
+
         }, robotGrabber));
 
         robotElevator.setDefaultCommand(new RunCommand(()->{
@@ -70,19 +71,43 @@ public class Teleop extends Robot {
             } else if (pilotController.wasJustReleased(GamepadKeys.Button.RIGHT_BUMPER) || pilotController.wasJustReleased(GamepadKeys.Button.LEFT_BUMPER) || copilotController.isDown(GamepadKeys.Button.LEFT_BUMPER) || copilotController.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
                 robotElevator.stopElevator();
             }
-            if (pilotController.isDown(GamepadKeys.Button.X)) {
+            if (pilotController.wasJustReleased(GamepadKeys.Button.B)) {
                  robotElevator.setPoignet();
             }
-            if (pilotController.isDown(GamepadKeys.Button.RIGHT_STICK_BUTTON) || copilotController.isDown(GamepadKeys.Button.RIGHT_STICK_BUTTON)){
+            if (pilotController.wasJustReleased(GamepadKeys.Button.RIGHT_STICK_BUTTON) || copilotController.wasJustReleased(GamepadKeys.Button.RIGHT_STICK_BUTTON)){
                 robotElevator.setPince();
             }
-            if (pilotController.isDown(GamepadKeys.Button.RIGHT_STICK_BUTTON) || copilotController.isDown(GamepadKeys.Button.RIGHT_STICK_BUTTON)){
+            if (pilotController.wasJustReleased(GamepadKeys.Button.A) || copilotController.wasJustReleased(GamepadKeys.Button.A)){
                 robotElevator.setCoude();
             }
-            if (pilotController.wasJustReleased(GamepadKeys.Button.DPAD_UP)){
-                robotElevator.startClimb();
-            }
+
 
         },robotElevator));
+
+        // when button dpad_up is pressed
+        // execute command
+        pilotController.getGamepadButton(GamepadKeys.Button.DPAD_UP)
+                .whenReleased(new RunCommand(
+                        () -> {
+                            robotGrabber.startClimb();
+                            robotElevator.startClimb();
+                        }, robotElevator, robotGrabber
+                ).andThen());
+
+        // when both up and down are pressed (example)
+        //
+        /*pilotController.getGamepadButton(GamepadKeys.Button.DPAD_UP).and(
+                pilotController.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed()
+        )*/
+
+        // btw maybe not RunCommand since it runs infinitely
+        // you can use the InstantCommand for a thing that runs once
+        // got it?
+        // yup
+        // welp gl on this friendly competition
+        // hopefully i'd have time to help next week before feb 8
+        // <3 good luck in school
+        // tyyyyy
+        // bye
     }
 }

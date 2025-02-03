@@ -24,13 +24,12 @@ import org.firstinspires.ftc.teamcode.Constants;
 
 public class ElevatorSubsystem extends SubsystemBase {
     private static final ElevatorSubsystem INSTANCE = new ElevatorSubsystem();
-    private MotorEx elevatorRightMotor;
-    private MotorEx elevatorLeftMotor;
+    private MotorEx elevatorRightMotor, elevatorLeftMotor, elevatorRightMotorEncoder;
     private Telemetry telemetry;
     private DigitalChannel elevatorDownLimit;
     private ServoEx ElPinceServo, ElCoudeServo, ElPoignetServo;
     private double ElPinceServoCurrentPosition, ElCoudeServoCurrentPosition,ElPoignetServoCurrentPosition;
-    private boolean PoignetZero, PinceZero, CoudeZero;
+    private boolean PoignetZero, PinceZero, CoudeZero, resetElevator;
     private MotorGroup elevatorMotors;
     private ElevatorSubsystem() {}
     public static ElevatorSubsystem getInstance() {
@@ -45,6 +44,8 @@ public class ElevatorSubsystem extends SubsystemBase {
 
         elevatorRightMotor = new MotorEx(globalSubsystem.hardwareMap, Constants.ElevatorConstants.ELEVATOR_RIGHT_MOTOR_NAME);
         elevatorLeftMotor = new MotorEx(globalSubsystem.hardwareMap, Constants.ElevatorConstants.ELEVATOR_LEFT_MOTOR_NAME);
+
+        elevatorRightMotorEncoder = new MotorEx(globalSubsystem.hardwareMap, Constants.GrabberConstants.GRABBER_RIGHT_MOTOR_NAME);
 
         ElPinceServo = new SimpleServo(hardwareMap, ELEVATOR_PINCE_SERVO_NAME, PINCE_SERVO_MIN_POSITION, PINCE_SERVO_MAX_POSITION);
         ElCoudeServo = new SimpleServo(hardwareMap, ELEVATOR_COUDE_SERVO_NAME, COUDE_SERVO_MIN_POSITION, COUDE_SERVO_MAX_POSITION);
@@ -67,7 +68,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         elevatorRightMotor.setInverted(false);
         elevatorLeftMotor.setInverted(true);
 
-        elevatorRightMotor.resetEncoder();
+        elevatorRightMotorEncoder.resetEncoder();
 
         elevatorMotors = new MotorGroup(elevatorLeftMotor, elevatorRightMotor);
 
@@ -79,6 +80,8 @@ public class ElevatorSubsystem extends SubsystemBase {
         PoignetZero = false;
         PinceZero = true;
         CoudeZero = true;
+
+        resetElevator = false;
 
     }
 
@@ -99,31 +102,38 @@ public class ElevatorSubsystem extends SubsystemBase {
     public void setPoignet() {
         if (PoignetZero){
             ElPoignetServoCurrentPosition = POIGNET_SERVO_MAX_POSITION;
+            PoignetZero = false;
+
         }else{
             ElPoignetServoCurrentPosition = POIGNET_SERVO_MIN_POSITION;
+            PoignetZero = true;
         }
     }
 
     public void setPince() {
         if (!PinceZero){
             ElPinceServoCurrentPosition = PINCE_SERVO_MAX_POSITION;
+            PinceZero = true;
         }else{
             ElPinceServoCurrentPosition = PINCE_SERVO_MIN_POSITION;
+            PinceZero = false;
         }
     }
 
     public void setCoude() {
-        if (!PinceZero){
+        if (!CoudeZero){
             ElCoudeServoCurrentPosition = COUDE_SERVO_MAX_POSITION;
+            PinceZero = true;
         }else{
             ElCoudeServoCurrentPosition = COUDE_SERVO_MIN_POSITION;
+            PinceZero = false;
         }
     }
 
 
     public void periodic() {
-        telemetry.addData("Elevator Left", elevatorLeftMotor.getCurrentPosition());
-        telemetry.addData("Elevator Right", elevatorRightMotor.getCurrentPosition());
+        //telemetry.addData("Elevator Left", elevatorLeftMotor.getCurrentPosition());
+        telemetry.addData("Elevator Right", elevatorRightMotorEncoder.getCurrentPosition());
         //telemetry.addData("Pince", pinceServo.get );
         //pinceServo.setPower(0.3);
 
@@ -131,8 +141,12 @@ public class ElevatorSubsystem extends SubsystemBase {
         ElCoudeServo.setPosition(ElCoudeServoCurrentPosition);
         ElPoignetServo.setPosition(ElPoignetServoCurrentPosition);
 
-
+        if (resetElevator && elevatorRightMotorEncoder.getCurrentPosition() < 50){
+            ElCoudeServoCurrentPosition = COUDE_SERVO_MIN_POSITION;
+        }
         if (!elevatorDownLimit.getState()) {
+            elevatorRightMotor.resetEncoder();
+            resetElevator = true;
             elevatorMotors.stopMotor();
         }
 
@@ -140,7 +154,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
 
     public void startClimb() {
-
+        ElCoudeServoCurrentPosition = COUDE_SERVO_MIN_POSITION;
         // Grabber Goes to limit switch and poignet goes up
         elevatorMotors.set(-0.4);
         //Elevator Goes up
