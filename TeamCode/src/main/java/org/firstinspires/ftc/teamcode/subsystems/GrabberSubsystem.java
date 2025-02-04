@@ -215,12 +215,12 @@ public class GrabberSubsystem extends SubsystemBase {
         pinceServo.setPower(0);
     }
 
-    public boolean extendSlides(double power) {
+    public void extendSlides(double power) {
         if (power > 0 && grabberLeftMotor.getCurrentPosition() < 1000){
             slideMotors.set(power);
         }else{
             slideMotors.stopMotor();
-            return true;
+            
         }
     }
 
