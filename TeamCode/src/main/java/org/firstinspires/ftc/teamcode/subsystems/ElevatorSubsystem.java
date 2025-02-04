@@ -89,6 +89,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
         if (power<0 && !elevatorDownLimit.getState()) {
             elevatorMotors.stopMotor();
+            ElPinceServoCurrentPosition = PINCE_SERVO_MAX_POSITION;
         }else if (power > 0 && !elevatorDownLimit.getState()) {
             ElPinceServoCurrentPosition = PINCE_SERVO_MIN_POSITION;
             elevatorMotors.set(power);
@@ -143,6 +144,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     public void periodic() {
         //telemetry.addData("Elevator Left", elevatorLeftMotor.getCurrentPosition());
         telemetry.addData("Elevator Right", elevatorRightMotorEncoder.getCurrentPosition());
+        telemetry.addData("Elevator Limit Switch", elevatorDownLimit.getState());
         //telemetry.addData("Pince", pinceServo.get );
         //pinceServo.setPower(0.3);
 
@@ -161,12 +163,11 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
 
-    public boolean startClimb() {
+    public void startClimb() {
         ElCoudeServoCurrentPosition = COUDE_SERVO_MIN_POSITION;
         // Grabber Goes to limit switch and poignet goes up
         if (elevatorDownLimit.getState()){
             elevatorMotors.set(-0.4);}
         //Elevator Goes up
-        return true;
     }
 }

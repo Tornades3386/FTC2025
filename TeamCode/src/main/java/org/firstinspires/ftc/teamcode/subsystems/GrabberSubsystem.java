@@ -33,7 +33,7 @@ public class GrabberSubsystem extends SubsystemBase {
     private Telemetry telemetry;
 
     private static double targetPositionPoignet, currentPosition;
-    private boolean dropState, pinceState, rightState, startClimb;
+    private boolean dropState, pinceState, rightState, startClimb, resetGrabber;
     private DigitalChannel grabberDropLimit;
     private ColorSensor colorPince;
     private MotorGroup slideMotors;
@@ -51,8 +51,8 @@ public class GrabberSubsystem extends SubsystemBase {
 
         telemetry = globalSubsystem.telemetry;
 
-        grabberRightMotor = new MotorEx(globalSubsystem.hardwareMap, GrabberConstants.GRABBER_LEFT_MOTOR_NAME);
-        grabberLeftMotor = new MotorEx(globalSubsystem.hardwareMap, GrabberConstants.GRABBER_RIGHT_MOTOR_NAME);
+        grabberRightMotor = new MotorEx(globalSubsystem.hardwareMap, GrabberConstants.GRABBER_RIGHT_MOTOR_NAME);
+        grabberLeftMotor = new MotorEx(globalSubsystem.hardwareMap, GrabberConstants.GRABBER_LEFT_MOTOR_NAME);
 
         poignetServo = new SimpleServo(hardwareMap, GrabberConstants.POIGNET_SERVO_NAME, 0.25, 1);
         pinceServo = hardwareMap.get(CRServo.class, GrabberConstants.PINCE_SERVO_NAME);
@@ -79,6 +79,8 @@ public class GrabberSubsystem extends SubsystemBase {
         pinceServo.setPower(0);
 
         startClimb = false;
+
+        resetGrabber = false;
 
         pinceState = false;
         rightState = false;
@@ -130,7 +132,7 @@ public class GrabberSubsystem extends SubsystemBase {
 
     public void setGrabberPower(double power){
         //Quand on rentre le Grabber
-        if (power < 0 ) {
+        if (power < 0  ) {
             //newPositionPoignet = Math.max(0.25, Math.min(1, poignetServo.getPosition() + 2));
             //poignetServo.setPosition(newPositionPoignet);
             //Si on a un sample
@@ -139,7 +141,7 @@ public class GrabberSubsystem extends SubsystemBase {
                 currentPosition = POIGNET_SERVO_MID_POSITION;
             }
             //Quand on arrive a ;a limit switch
-            if (!grabberDropLimit.getState()){
+            if (!grabberDropLimit.getState() ){
                 //Si on a un smaple
                 if (Double.parseDouble(JavaUtil.formatNumber(colorPince_DistanceSensor.getDistance(DistanceUnit.CM), 3)) < 3.2) {
                     slideMotors.stopMotor();
@@ -168,7 +170,7 @@ public class GrabberSubsystem extends SubsystemBase {
 
 
 
-            } else if (grabberLeftMotor.getCurrentPosition() <= -250) {
+            } else if (grabberLeftMotor.getCurrentPosition() <= -250 && resetGrabber) {
                 slideMotors.stopMotor();
 
             }
@@ -194,29 +196,30 @@ public class GrabberSubsystem extends SubsystemBase {
         slideMotors.stopMotor();
     }
 
-    public boolean startClimb(){
-        currentPosition = POIGNET_SERVO_MAX_POSITION;
-        if (grabberLeftMotor.getCurrentPosition() < -10 && grabberLeftMotor.getCurrentPosition() >50) {
+    public void startClimb(){
+        currentPosition = Math.max(GrabberConstants.POIGNET_SERVO_MIN_POSITION, Math.min(POIGNET_SERVO_MAX_POSITION, poignetServo.getPosition() + 2));
+        if (grabberLeftMotor.getCurrentPosition() < -40 || grabberLeftMotor.getCurrentPosition() >50) {
             if (grabberLeftMotor.getCurrentPosition() > 10) {
                 slideMotors.set(-0.4);
             } else if (grabberLeftMotor.getCurrentPosition() < 10) {
                 slideMotors.set(0.4);
             }
         }
-        return true;
+        else{
+            slideMotors.stopMotor();
+        }
 
     }
     public void stopPince() {
         pinceServo.setPower(0);
     }
 
-    public boolean extendSlides(double power) {
+    public void extendSlides(double power) {
         if (power > 0 && grabberLeftMotor.getCurrentPosition() < 1000){
             slideMotors.set(power);
         }else{
-            slideMotors.set(power);
+            slideMotors.stopMotor();
         }
-        return true;
     }
 
 
@@ -239,6 +242,7 @@ public class GrabberSubsystem extends SubsystemBase {
 
         if (!grabberDropLimit.getState()){
             grabberLeftMotor.resetEncoder();
+            resetGrabber = true;
         }
         if(grabberLeftMotor.getCurrentPosition() < -50){
             currentPosition = POIGNET_SERVO_MID_POSITION;

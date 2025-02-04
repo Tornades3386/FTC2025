@@ -62,11 +62,11 @@ public class Constants {
         public static double PINCE_SERVO_MIN_POSITION = 0;
         public static double PINCE_SERVO_MAX_POSITION = 0.25;
 
-        public static double COUDE_SERVO_MIN_POSITION = 0.185;
-        public static double COUDE_SERVO_MAX_POSITION = 1;
+        public static double COUDE_SERVO_MIN_POSITION = 0.05;
+        public static double COUDE_SERVO_MAX_POSITION = 0.85;
 
-        public static double POIGNET_SERVO_MIN_POSITION = 0.83;
-        public static double POIGNET_SERVO_MAX_POSITION = 0.93;
+        public static double POIGNET_SERVO_MIN_POSITION = 0.73;
+        public static double POIGNET_SERVO_MAX_POSITION = 0.83;
 
 
     }

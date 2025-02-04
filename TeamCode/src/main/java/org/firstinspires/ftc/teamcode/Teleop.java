@@ -78,13 +78,13 @@ public class Teleop extends Robot {
                 robotElevator.stopElevator();
             }
 
-            if (pilotController.wasJustReleased(GamepadKeys.Button.B)) {
+            if (pilotController.wasJustPressed(GamepadKeys.Button.B)) {
                  robotElevator.setPoignet();
             }
-            if (pilotController.wasJustReleased(GamepadKeys.Button.RIGHT_STICK_BUTTON) || copilotController.wasJustReleased(GamepadKeys.Button.RIGHT_STICK_BUTTON)){
+            if (pilotController.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON) || copilotController.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)){
                 robotElevator.setPince();
             }
-            if (pilotController.wasJustReleased(GamepadKeys.Button.A) || copilotController.wasJustReleased(GamepadKeys.Button.A)){
+            if (pilotController.wasJustPressed(GamepadKeys.Button.A) || copilotController.wasJustPressed(GamepadKeys.Button.A)){
                 robotElevator.setCoude();
             }
 
@@ -107,7 +107,7 @@ public class Teleop extends Robot {
                                 },robotDrive, robotGrabber
                 )));
 
-        pilotController.getGamepadButton(GamepadKeys.Button.DPAD_UP)
+        pilotController.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
                 .whileHeld(new RunCommand(
                         () -> {
                             robotGrabber.startClimb();
