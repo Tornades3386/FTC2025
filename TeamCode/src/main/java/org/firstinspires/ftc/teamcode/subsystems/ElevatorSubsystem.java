@@ -163,11 +163,12 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
 
-    public void startClimb() {
+    public boolean startClimb() {
         ElCoudeServoCurrentPosition = COUDE_SERVO_MIN_POSITION;
         // Grabber Goes to limit switch and poignet goes up
         if (elevatorDownLimit.getState()){
             elevatorMotors.set(-0.4);}
+        else {return true;}
         //Elevator Goes up
     }
 }
