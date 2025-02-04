@@ -93,33 +93,51 @@ public class Teleop extends Robot {
 
         // when button dpad_up is pressed
         // execute command
+        boolean climbStep1s1 = false;
+        boolean climbStep1s2 = false;
+        
+        
+        boolean climbStep2 = false;
         pilotController.getGamepadButton(GamepadKeys.Button.DPAD_UP)
                 .whileHeld(new RunCommand(
                         () -> {
-                            robotGrabber.startClimb();
-                            robotElevator.startClimb();
-                        }, robotElevator, robotGrabber
-                ).andThen(
+                            climbStep1s1 = robotGrabber.startClimb();
+                            climbStep1s2 = robotElevator.startClimb();
+                            if (climbStep1s1 && climbStep1s2) {
+                                robotDrive.startClimb(0.8);
+                                robotGrabber.extendSlides(0.8);
+                                }
+                        }, robotElevator, robotGrabber,robotDrive
+                ));
+            /*.andThen(
                         new RunCommand(
                                 () -> {
                                     robotDrive.startClimb(0.8);
                                     robotGrabber.extendSlides(0.8);
                                 },robotDrive, robotGrabber
-                )));
+                )));*/
 
+        boolean climbStep2s1 = false;
+        boolean climbStep2s2 = false;
+        
         pilotController.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
                 .whileHeld(new RunCommand(
                         () -> {
-                            robotGrabber.startClimb();
-                            robotElevator.startClimb();
+                            climbStep2s1 = robotGrabber.startClimb();
+                            climbStep2s1 = robotElevator.startClimb();
+
+                            if (climbStep2s1 && climbStep2s2) {
+                                robotGrabber.extendSlides(-1);
+                                }
                         }, robotElevator, robotGrabber
-                ).andThen(
+                ));
+        /*.andThen(
                         new RunCommand(
                                 () -> {
                                     //robotDrive.startClimb(0.1);
                                     robotGrabber.extendSlides(-1);
                                 },robotDrive, robotGrabber
-                        )));
+                        )));*/
         /*pilotController.getGamepadButton(GamepadKeys.Button.DPAD_UP).and(
                 pilotController.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed()
         )*/
