@@ -114,7 +114,8 @@ public class Drive9axisIMU extends SubsystemBase {
     }
 
     public void startClimb(double power) {
-        rearMotors.set(power);
+        backLeftPower = power;
+        backRightPower = power;
     }
 
 

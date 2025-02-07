@@ -1,12 +1,13 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import static org.firstinspires.ftc.teamcode.Constants.ElevatorConstants.COUDE_SERVO_MAX_POSITION;
+import static org.firstinspires.ftc.teamcode.Constants.ElevatorConstants.COUDE_SERVO_MID_POSITION;
 import static org.firstinspires.ftc.teamcode.Constants.ElevatorConstants.COUDE_SERVO_MIN_POSITION;
 import static org.firstinspires.ftc.teamcode.Constants.ElevatorConstants.ELEVATOR_COUDE_SERVO_NAME;
 import static org.firstinspires.ftc.teamcode.Constants.ElevatorConstants.ELEVATOR_PINCE_SERVO_NAME;
 import static org.firstinspires.ftc.teamcode.Constants.ElevatorConstants.ELEVATOR_POIGNET_SERVO_NAME;
-import static org.firstinspires.ftc.teamcode.Constants.ElevatorConstants.PINCE_SERVO_MAX_POSITION;
-import static org.firstinspires.ftc.teamcode.Constants.ElevatorConstants.PINCE_SERVO_MIN_POSITION;
+import static org.firstinspires.ftc.teamcode.Constants.ElevatorConstants.PINCE_SERVO_OPEN_POSITION;
+import static org.firstinspires.ftc.teamcode.Constants.ElevatorConstants.PINCE_SERVO_CLOSED_POSITION;
 import static org.firstinspires.ftc.teamcode.Constants.ElevatorConstants.POIGNET_SERVO_MAX_POSITION;
 import static org.firstinspires.ftc.teamcode.Constants.ElevatorConstants.POIGNET_SERVO_MIN_POSITION;
 import com.arcrobotics.ftclib.command.SubsystemBase;
@@ -15,7 +16,6 @@ import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.arcrobotics.ftclib.hardware.motors.MotorGroup;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -29,7 +29,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     private DigitalChannel elevatorDownLimit;
     private ServoEx ElPinceServo, ElCoudeServo, ElPoignetServo;
     private double ElPinceServoCurrentPosition, ElCoudeServoCurrentPosition,ElPoignetServoCurrentPosition;
-    private boolean PoignetZero, PinceZero, CoudeZero, resetElevator;
+    private boolean PoignetZero, CoudeZero, resetElevator,FinishClimb, enTransitCoude, enTransitPince, pinceClose;
     private MotorGroup elevatorMotors;
     private ElevatorSubsystem() {}
     public static ElevatorSubsystem getInstance() {
@@ -47,11 +47,11 @@ public class ElevatorSubsystem extends SubsystemBase {
 
         elevatorRightMotorEncoder = new MotorEx(globalSubsystem.hardwareMap, Constants.GrabberConstants.GRABBER_RIGHT_MOTOR_NAME);
 
-        ElPinceServo = new SimpleServo(hardwareMap, ELEVATOR_PINCE_SERVO_NAME, PINCE_SERVO_MIN_POSITION, PINCE_SERVO_MAX_POSITION);
+        ElPinceServo = new SimpleServo(hardwareMap, ELEVATOR_PINCE_SERVO_NAME, PINCE_SERVO_CLOSED_POSITION, PINCE_SERVO_OPEN_POSITION);
         ElCoudeServo = new SimpleServo(hardwareMap, ELEVATOR_COUDE_SERVO_NAME, COUDE_SERVO_MIN_POSITION, COUDE_SERVO_MAX_POSITION);
         ElPoignetServo = new SimpleServo(hardwareMap, ELEVATOR_POIGNET_SERVO_NAME, POIGNET_SERVO_MIN_POSITION, POIGNET_SERVO_MAX_POSITION);
 
-        ElPinceServoCurrentPosition = PINCE_SERVO_MIN_POSITION;
+        ElPinceServoCurrentPosition = PINCE_SERVO_CLOSED_POSITION;
         ElCoudeServoCurrentPosition = COUDE_SERVO_MIN_POSITION;
         ElPoignetServoCurrentPosition = POIGNET_SERVO_MAX_POSITION;
 
@@ -77,9 +77,13 @@ public class ElevatorSubsystem extends SubsystemBase {
         //bottomLimit = globalSubsystem.hardwareMap.get(DigitalChannel.class, ArmConstants.BOTTOM_LIMIT_SWITCH_NAME);
 
         elevatorDownLimit.setMode(DigitalChannel.Mode.INPUT);
-        PoignetZero = false;
-        PinceZero = true;
-        CoudeZero = true;
+        PoignetZero = true;
+        CoudeZero = false;
+        pinceClose = false;
+
+        enTransitCoude = false;
+
+        enTransitPince = false;
 
         resetElevator = false;
 
@@ -89,16 +93,16 @@ public class ElevatorSubsystem extends SubsystemBase {
 
         if (power<0 && !elevatorDownLimit.getState()) {
             elevatorMotors.stopMotor();
-            ElPinceServoCurrentPosition = PINCE_SERVO_MAX_POSITION;
+            ElPinceServoCurrentPosition = PINCE_SERVO_OPEN_POSITION;
+            ElPoignetServoCurrentPosition = POIGNET_SERVO_MAX_POSITION;
         }else if (power > 0 && !elevatorDownLimit.getState()) {
-            ElPinceServoCurrentPosition = PINCE_SERVO_MIN_POSITION;
-            elevatorMotors.set(power);
-            PinceZero = false;
-        }
-        else if (power <0 && elevatorRightMotorEncoder.getCurrentPosition() < 50){
-            elevatorMotors.set(power/1.3);
-            ElCoudeServoCurrentPosition = COUDE_SERVO_MIN_POSITION;
-            CoudeZero = false;
+            if(!pinceClose){
+                enTransitPince = true;
+            }else if(pinceClose && !enTransitPince){
+                elevatorMotors.set(power);
+            }
+            //ElPinceServoCurrentPosition = PINCE_SERVO_MIN_POSITION
+
         }else {
             elevatorMotors.set(power);
         }
@@ -109,35 +113,57 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
 
-    public void setPoignet() {
+    /*public void setPoignet() {
         if (PoignetZero){
-            ElPoignetServoCurrentPosition = POIGNET_SERVO_MAX_POSITION;
+            ElPoignetServoCurrentPosition = ElPoignetServoCurrentPosition + ;
             PoignetZero = false;
 
         }else{
             ElPoignetServoCurrentPosition = POIGNET_SERVO_MIN_POSITION;
             PoignetZero = true;
         }
+    }*/
+
+    public void openPince() {
+
+        ElPinceServoCurrentPosition = PINCE_SERVO_OPEN_POSITION;
+
     }
 
-    public void setPince() {
-        if (!PinceZero){
-            ElPinceServoCurrentPosition = PINCE_SERVO_MAX_POSITION;
-            PinceZero = true;
-        }else{
-            ElPinceServoCurrentPosition = PINCE_SERVO_MIN_POSITION;
-            PinceZero = false;
-        }
+    public void closePince() {
+
+        ElPinceServoCurrentPosition = PINCE_SERVO_CLOSED_POSITION;
+
     }
 
     public void setCoude() {
-        if (!CoudeZero){
+
+        enTransitCoude = true;
+
+
+    }
+
+    public void addToCoude() {
+        if(ElCoudeServoCurrentPosition >= 0.70) {
             ElCoudeServoCurrentPosition = COUDE_SERVO_MAX_POSITION;
-            CoudeZero = true;
-        }else{
-            ElCoudeServoCurrentPosition = COUDE_SERVO_MIN_POSITION;
-            CoudeZero = false;
         }
+    }
+
+    public boolean startClimb() {
+        if (!FinishClimb) {
+            ElCoudeServoCurrentPosition = COUDE_SERVO_MIN_POSITION;
+            // Grabber Goes to limit switch and poignet goes up
+            if (elevatorDownLimit.getState()) {
+                elevatorMotors.set(-1);
+                FinishClimb = false;
+                return false;
+            } else {
+                FinishClimb = true;
+                return true;
+            }
+        }
+        else{return true;}
+        //Elevator Goes up
     }
 
 
@@ -145,6 +171,8 @@ public class ElevatorSubsystem extends SubsystemBase {
         //telemetry.addData("Elevator Left", elevatorLeftMotor.getCurrentPosition());
         telemetry.addData("Elevator Right", elevatorRightMotorEncoder.getCurrentPosition());
         telemetry.addData("Elevator Limit Switch", elevatorDownLimit.getState());
+        telemetry.addData("EN TRANSIT Coude", enTransitCoude);
+        telemetry.addData("CLIMB ELEVATOR", FinishClimb);
         //telemetry.addData("Pince", pinceServo.get );
         //pinceServo.setPower(0.3);
 
@@ -156,19 +184,49 @@ public class ElevatorSubsystem extends SubsystemBase {
         if (!elevatorDownLimit.getState()) {
             elevatorMotors.stopMotor();
             elevatorRightMotor.resetEncoder();
+            ElPoignetServoCurrentPosition = POIGNET_SERVO_MAX_POSITION;
             resetElevator = true;
 
+        }
+
+        if(enTransitPince){
+            if (ElPinceServoCurrentPosition > PINCE_SERVO_CLOSED_POSITION) {
+                ElPinceServoCurrentPosition -= 0.02;
+            }else{
+                pinceClose = true;
+                enTransitPince = false;
+            }
+        }
+
+        if (enTransitCoude) {
+            if (!CoudeZero) {
+                if (ElCoudeServoCurrentPosition < COUDE_SERVO_MID_POSITION) {
+                    ElPoignetServoCurrentPosition = POIGNET_SERVO_MIN_POSITION;
+                    ElCoudeServoCurrentPosition += 0.02;
+
+                } else {
+                    ElPoignetServoCurrentPosition = POIGNET_SERVO_MAX_POSITION;
+                    CoudeZero = true;
+                    enTransitCoude = false;
+                }
+
+
+            } else {
+                if (ElCoudeServoCurrentPosition > COUDE_SERVO_MIN_POSITION) {
+                    ElPoignetServoCurrentPosition = POIGNET_SERVO_MIN_POSITION;
+                    ElCoudeServoCurrentPosition -= 0.02;
+
+                } else {
+                    ElPoignetServoCurrentPosition = POIGNET_SERVO_MAX_POSITION;
+                    CoudeZero = false;
+                    enTransitCoude = false;
+                }
+
+            }
         }
 
     }
 
 
-    public boolean startClimb() {
-        ElCoudeServoCurrentPosition = COUDE_SERVO_MIN_POSITION;
-        // Grabber Goes to limit switch and poignet goes up
-        if (elevatorDownLimit.getState()){
-            elevatorMotors.set(-0.4);}
-        else {return true;}
-        //Elevator Goes up
-    }
+
 }

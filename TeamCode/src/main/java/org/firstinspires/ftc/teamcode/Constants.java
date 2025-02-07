@@ -47,7 +47,7 @@ public class Constants {
         public static String PINCE_SERVO_NAME = "servoGrabberPince";
         public static String GRABBER_DROP_LIMIT = "grabberDropLimit";
         public static double POIGNET_SERVO_MIN_POSITION = 0;
-        public static double POIGNET_SERVO_MAX_POSITION = 0.75;
+        public static double POIGNET_SERVO_MAX_POSITION = 0.85;
         public static double POIGNET_SERVO_MID_POSITION = 0.35;
 
     }
@@ -59,14 +59,15 @@ public class Constants {
         public static String ELEVATOR_COUDE_SERVO_NAME = "elevator1";
         public static String ELEVATOR_POIGNET_SERVO_NAME = "elevator2";
 
-        public static double PINCE_SERVO_MIN_POSITION = 0;
-        public static double PINCE_SERVO_MAX_POSITION = 0.25;
+        public static double PINCE_SERVO_CLOSED_POSITION = 0;
+        public static double PINCE_SERVO_OPEN_POSITION = 0.2;
 
-        public static double COUDE_SERVO_MIN_POSITION = 0.05;
-        public static double COUDE_SERVO_MAX_POSITION = 0.85;
+        public static double POIGNET_SERVO_MIN_POSITION = 0.83;
+        public static double POIGNET_SERVO_MAX_POSITION = 0.94;
 
-        public static double POIGNET_SERVO_MIN_POSITION = 0.73;
-        public static double POIGNET_SERVO_MAX_POSITION = 0.83;
+        public static double COUDE_SERVO_MIN_POSITION = 0.12;
+        public static double COUDE_SERVO_MID_POSITION = 0.83;
+        public static double COUDE_SERVO_MAX_POSITION = 1;
 
 
     }

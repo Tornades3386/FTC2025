@@ -1,13 +1,11 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.RunCommand;
-import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
-import com.arcrobotics.ftclib.geometry.Pose2d;
-import com.arcrobotics.ftclib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @TeleOp(name = "base")
 public class Teleop extends Robot {
@@ -53,9 +51,9 @@ public class Teleop extends Robot {
 
             if (pilotController.isDown(GamepadKeys.Button.Y)){
                 robotGrabber.vomit();
-            }else {
+            }/*else {
                 robotGrabber.stopPince();
-            }
+            }*/
 
         }, robotGrabber));
 
@@ -79,13 +77,15 @@ public class Teleop extends Robot {
             }
 
             if (pilotController.wasJustPressed(GamepadKeys.Button.B)) {
-                 robotElevator.setPoignet();
+                 robotElevator.setCoude();
             }
-            if (pilotController.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON) || copilotController.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)){
-                robotElevator.setPince();
+            if (pilotController.isDown(GamepadKeys.Button.RIGHT_STICK_BUTTON) || copilotController.isDown(GamepadKeys.Button.RIGHT_STICK_BUTTON)){
+                robotElevator.openPince();
+            }else if(pilotController.wasJustReleased(GamepadKeys.Button.RIGHT_STICK_BUTTON) || copilotController.wasJustReleased(GamepadKeys.Button.RIGHT_STICK_BUTTON)){
+                robotElevator.closePince();
             }
             if (pilotController.wasJustPressed(GamepadKeys.Button.A) || copilotController.wasJustPressed(GamepadKeys.Button.A)){
-                robotElevator.setCoude();
+                robotElevator.addToCoude();
             }
 
 
@@ -93,20 +93,35 @@ public class Teleop extends Robot {
 
         // when button dpad_up is pressed
         // execute command
-        boolean climbStep1s1 = false;
-        boolean climbStep1s2 = false;
-        
-        
-        boolean climbStep2 = false;
+        AtomicBoolean climbStep1s1 = new AtomicBoolean(false);
+        AtomicBoolean climbStep1s2 = new AtomicBoolean(false);
+
+        AtomicBoolean climbStep1 = new AtomicBoolean(false);
+
+
+
+        AtomicBoolean finishedClim = new AtomicBoolean(false);
         pilotController.getGamepadButton(GamepadKeys.Button.DPAD_UP)
-                .whileHeld(new RunCommand(
+                .whenReleased(new RunCommand(
                         () -> {
-                            climbStep1s1 = robotGrabber.startClimb();
-                            climbStep1s2 = robotElevator.startClimb();
-                            if (climbStep1s1 && climbStep1s2) {
-                                robotDrive.startClimb(0.8);
-                                robotGrabber.extendSlides(0.8);
+                            if(!climbStep1.get()) {
+
+                                climbStep1.set(true);
+                                if (climbStep1s1.get() && climbStep1s2.get()) {
+                                    robotDrive.startClimb(1);
+
+                                    //robotGrabber.extendSlides(0.4);
+                                    //robotGrabber.extendSlides(0.8);
+                                } else {
+                                    climbStep1s1.set(robotGrabber.startClimb());
+                                    climbStep1s2.set(robotElevator.startClimb());
                                 }
+                            }
+                                else{
+                                robotDrive.startClimb(0);
+                                climbStep1.set(false);
+
+                            }
                         }, robotElevator, robotGrabber,robotDrive
                 ));
             /*.andThen(
@@ -117,19 +132,38 @@ public class Teleop extends Robot {
                                 },robotDrive, robotGrabber
                 )));*/
 
-        boolean climbStep2s1 = false;
-        boolean climbStep2s2 = false;
+        AtomicBoolean climbStep2s1 = new AtomicBoolean(false);
+        AtomicBoolean climbStep2s2 = new AtomicBoolean(false);
         
         pilotController.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
-                .whileHeld(new RunCommand(
+                .whenPressed(new RunCommand(
                         () -> {
-                            climbStep2s1 = robotGrabber.startClimb();
-                            climbStep2s1 = robotElevator.startClimb();
-
-                            if (climbStep2s1 && climbStep2s2) {
+                            /*robotDrive.startClimb(0);
+                            if (climbStep2s1.get() && climbStep2s2.get()) {
                                 robotGrabber.extendSlides(-1);
                                 }
-                        }, robotElevator, robotGrabber
+                            else {*/
+                            if(!climbStep2s1.get()) {
+                                climbStep2s1.set(robotGrabber.extendSlides(0.4));
+                            }
+                            else if (!finishedClim.get() && climbStep2s1.get()){
+                                robotGrabber.lastPush();
+                                robotDrive.startClimb(-1);
+                                robotElevator.startClimb();
+                                finishedClim.set(true);
+                                climbStep2s1.set(false);
+                            }else if(finishedClim.get()){
+                                robotGrabber.stopGrabberPower();
+                                robotDrive.startClimb(0);
+                                robotElevator.stopElevator();
+                                finishedClim.set(false);
+
+                            }
+
+
+                                //climbStep2s2.set(robotElevator.startClimb());
+                            //}
+                        }, robotElevator, robotGrabber, robotDrive
                 ));
         /*.andThen(
                         new RunCommand(
