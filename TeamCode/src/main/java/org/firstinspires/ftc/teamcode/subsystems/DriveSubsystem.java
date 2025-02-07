@@ -20,18 +20,16 @@ public class DriveSubsystem extends SubsystemBase {
     private static MotorEx frontRight;
     private static MotorEx rearLeft;
     private static MotorEx rearRight;
-
-
-    private final double teta = Math.toRadians(45);
-    double epsilon = 0.00001;
-    double factor = 1/Math.abs(Math.sin(teta));
-//    private static IMU imu;
+    //    private static IMU imu;
 //    private static NavxMicroNavigationSensor navx;
     private static RevIMU imu;
-    boolean isPOV = false;
     private static ChassisSpeeds targetChassisSpeeds = new ChassisSpeeds();
+    private final double teta = Math.toRadians(45);
+    double epsilon = 0.00001;
+    double factor = 1 / Math.abs(Math.sin(teta));
+    boolean isPOV = false;
 
-     private DriveSubsystem() {
+    private DriveSubsystem() {
     }
 
     public static DriveSubsystem getInstance() {
@@ -95,16 +93,16 @@ public class DriveSubsystem extends SubsystemBase {
 
     public void drive(ChassisSpeeds chassisSpeeds, boolean fieldRelative, Rotation2d rotateBy) {
         targetChassisSpeeds = fieldRelative ?
-                fromFieldRelativeSpeeds(
-                        chassisSpeeds, imu.getRotation2d())
-                : chassisSpeeds;
+            fromFieldRelativeSpeeds(
+                chassisSpeeds, imu.getRotation2d())
+            : chassisSpeeds;
     }
 
     private ChassisSpeeds fromFieldRelativeSpeeds(ChassisSpeeds chassisSpeeds, Rotation2d robotAngle) {
         return new ChassisSpeeds(
-                chassisSpeeds.vxMetersPerSecond * robotAngle.getCos() - chassisSpeeds.vyMetersPerSecond * robotAngle.getSin(),
-                chassisSpeeds.vyMetersPerSecond * robotAngle.getCos() + chassisSpeeds.vxMetersPerSecond * robotAngle.getSin(),
-                chassisSpeeds.omegaRadiansPerSecond
+            chassisSpeeds.vxMetersPerSecond * robotAngle.getCos() - chassisSpeeds.vyMetersPerSecond * robotAngle.getSin(),
+            chassisSpeeds.vyMetersPerSecond * robotAngle.getCos() + chassisSpeeds.vxMetersPerSecond * robotAngle.getSin(),
+            chassisSpeeds.omegaRadiansPerSecond
         );
     }
 

@@ -51,6 +51,6 @@ public class GlobalSubsystem extends SubsystemBase {
         telemetry.update();
         fieldPacket = new TelemetryPacket();
         fieldPacket.fieldOverlay()
-                .setScale(Constants.CENTIMETER_PER_INCH_INVERSE, Constants.CENTIMETER_PER_INCH_INVERSE);
+            .setScale(Constants.CENTIMETER_PER_INCH_INVERSE, Constants.CENTIMETER_PER_INCH_INVERSE);
     }
 }

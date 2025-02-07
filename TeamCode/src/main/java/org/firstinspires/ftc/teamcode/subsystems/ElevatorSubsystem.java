@@ -10,6 +10,7 @@ import static org.firstinspires.ftc.teamcode.Constants.ElevatorConstants.PINCE_S
 import static org.firstinspires.ftc.teamcode.Constants.ElevatorConstants.PINCE_SERVO_CLOSED_POSITION;
 import static org.firstinspires.ftc.teamcode.Constants.ElevatorConstants.POIGNET_SERVO_MAX_POSITION;
 import static org.firstinspires.ftc.teamcode.Constants.ElevatorConstants.POIGNET_SERVO_MIN_POSITION;
+
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.ServoEx;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
@@ -28,10 +29,13 @@ public class ElevatorSubsystem extends SubsystemBase {
     private Telemetry telemetry;
     private DigitalChannel elevatorDownLimit;
     private ServoEx ElPinceServo, ElCoudeServo, ElPoignetServo;
-    private double ElPinceServoCurrentPosition, ElCoudeServoCurrentPosition,ElPoignetServoCurrentPosition;
-    private boolean PoignetZero, CoudeZero, resetElevator,FinishClimb, enTransitCoude, enTransitPince, pinceClose;
+    private double ElPinceServoCurrentPosition, ElCoudeServoCurrentPosition, ElPoignetServoCurrentPosition;
+    private boolean PoignetZero, CoudeZero, resetElevator, FinishClimb, enTransitCoude, enTransitPince, pinceClose;
     private MotorGroup elevatorMotors;
-    private ElevatorSubsystem() {}
+
+    private ElevatorSubsystem() {
+    }
+
     public static ElevatorSubsystem getInstance() {
         return INSTANCE;
     }
@@ -55,9 +59,9 @@ public class ElevatorSubsystem extends SubsystemBase {
         ElCoudeServoCurrentPosition = COUDE_SERVO_MIN_POSITION;
         ElPoignetServoCurrentPosition = POIGNET_SERVO_MAX_POSITION;
 
-        ElPinceServo.setPosition(ElPinceServoCurrentPosition );
-        ElCoudeServo.setPosition(ElCoudeServoCurrentPosition );
-        ElPoignetServo.setPosition(ElPoignetServoCurrentPosition );
+        ElPinceServo.setPosition(ElPinceServoCurrentPosition);
+        ElCoudeServo.setPosition(ElCoudeServoCurrentPosition);
+        ElPoignetServo.setPosition(ElPoignetServoCurrentPosition);
 
 
         elevatorRightMotor.setRunMode(Motor.RunMode.RawPower);
@@ -91,23 +95,24 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public void setElevator(double power) {
 
-        if (power<0 && !elevatorDownLimit.getState()) {
+        if (power < 0 && !elevatorDownLimit.getState()) {
             elevatorMotors.stopMotor();
             ElPinceServoCurrentPosition = PINCE_SERVO_OPEN_POSITION;
             ElPoignetServoCurrentPosition = POIGNET_SERVO_MAX_POSITION;
-        }else if (power > 0 && !elevatorDownLimit.getState()) {
-            if(!pinceClose){
+        } else if (power > 0 && !elevatorDownLimit.getState()) {
+            if (!pinceClose) {
                 enTransitPince = true;
-            }else if(pinceClose && !enTransitPince){
+            } else if (pinceClose && !enTransitPince) {
                 elevatorMotors.set(power);
             }
             //ElPinceServoCurrentPosition = PINCE_SERVO_MIN_POSITION
 
-        }else {
+        } else {
             elevatorMotors.set(power);
         }
 
     }
+
     public void stopElevator() {
         elevatorMotors.stopMotor();
     }
@@ -144,7 +149,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public void addToCoude() {
-        if(ElCoudeServoCurrentPosition >= 0.70) {
+        if (ElCoudeServoCurrentPosition >= 0.70) {
             ElCoudeServoCurrentPosition = COUDE_SERVO_MAX_POSITION;
         }
     }
@@ -161,8 +166,9 @@ public class ElevatorSubsystem extends SubsystemBase {
                 FinishClimb = true;
                 return true;
             }
+        } else {
+            return true;
         }
-        else{return true;}
         //Elevator Goes up
     }
 
@@ -186,13 +192,12 @@ public class ElevatorSubsystem extends SubsystemBase {
             elevatorRightMotor.resetEncoder();
             ElPoignetServoCurrentPosition = POIGNET_SERVO_MAX_POSITION;
             resetElevator = true;
-
         }
 
-        if(enTransitPince){
+        if (enTransitPince) {
             if (ElPinceServoCurrentPosition > PINCE_SERVO_CLOSED_POSITION) {
                 ElPinceServoCurrentPosition -= 0.02;
-            }else{
+            } else {
                 pinceClose = true;
                 enTransitPince = false;
             }
@@ -221,12 +226,8 @@ public class ElevatorSubsystem extends SubsystemBase {
                     CoudeZero = false;
                     enTransitCoude = false;
                 }
-
             }
         }
 
     }
-
-
-
 }

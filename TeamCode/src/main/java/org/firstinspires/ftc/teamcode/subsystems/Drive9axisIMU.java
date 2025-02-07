@@ -22,25 +22,26 @@ public class Drive9axisIMU extends SubsystemBase {
     private static final Drive9axisIMU INSTANCE = new Drive9axisIMU();
 
     private static final MecanumDriveOdometry odometry = new MecanumDriveOdometry(Constants.DriveConstants.DRIVE_KINEMATICS, new Rotation2d());
-    private IMU imu;
-    private Telemetry telemetry;
-    private ImuOrientationOnRobot orientationOnRobot;
-    private YawPitchRollAngles orientation;
-    AngularVelocity angularVelocity;
-    private double botHeading;
-    private double frontLeftPower;
-    private double backLeftPower;
-    private double frontRightPower;
-    private double backRightPower;
     private static MotorEx frontLeft;
     private static MotorEx frontRight;
     private static MotorEx rearLeft;
     private static MotorEx rearRight;
     private static MotorGroup rearMotors;
-    private static ChassisSpeeds targetChassisSpeeds = new ChassisSpeeds();
+    private static final ChassisSpeeds targetChassisSpeeds = new ChassisSpeeds();
+    AngularVelocity angularVelocity;
+    private IMU imu;
+    private Telemetry telemetry;
+    private ImuOrientationOnRobot orientationOnRobot;
+    private YawPitchRollAngles orientation;
+    private double botHeading;
+    private double frontLeftPower;
+    private double backLeftPower;
+    private double frontRightPower;
+    private double backRightPower;
 
     private Drive9axisIMU() {
     }
+
     public static Drive9axisIMU getInstance() {
         return INSTANCE;
     }
@@ -52,8 +53,8 @@ public class Drive9axisIMU extends SubsystemBase {
         imu = hardwareMap.get(IMU.class, "imu");
         //orientationOnRobot = new Rev9AxisImuOrientationOnRobot(Rev9AxisImuOrientationOnRobot.LogoFacingDirection.UP, Rev9AxisImuOrientationOnRobot.I2cPortFacingDirection.FORWARD);
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                RevHubOrientationOnRobot.UsbFacingDirection.LEFT));
+            RevHubOrientationOnRobot.LogoFacingDirection.UP,
+            RevHubOrientationOnRobot.UsbFacingDirection.LEFT));
         // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
         imu.initialize(parameters);
         //imu = new RevIMU(hardwareMap, "navx");
@@ -66,7 +67,7 @@ public class Drive9axisIMU extends SubsystemBase {
         rearLeft = new MotorEx(globalSubsystem.hardwareMap, Constants.DriveConstants.REAR_LEFT_MOTOR_NAME);
         rearRight = new MotorEx(globalSubsystem.hardwareMap, Constants.DriveConstants.REAR_RIGHT_MOTOR_NAME);
 
-        rearMotors = new MotorGroup(rearLeft,rearRight);
+        rearMotors = new MotorGroup(rearLeft, rearRight);
 
         frontLeft.setInverted(true);
         rearLeft.setInverted(true);
@@ -86,17 +87,18 @@ public class Drive9axisIMU extends SubsystemBase {
         rearRight.setZeroPowerBehavior(MotorEx.ZeroPowerBehavior.BRAKE);
 
     }
+
     public void drive(double leftY, double leftX, double rightX, boolean fieldRelative) {
         double rx;
         double rotY;
         double rotX;
         //leftY = -leftY;
 
-        if (!fieldRelative){
+        if (!fieldRelative) {
             rotX = leftX * 1.1;
             rotY = leftY;
 
-        }else{
+        } else {
             rotX = leftX * Math.cos(-botHeading) - leftY * Math.sin(-botHeading);
             rotY = leftX * Math.sin(-botHeading) + leftY * Math.cos(-botHeading);
             rotX = rotX * 1.1;
@@ -105,7 +107,7 @@ public class Drive9axisIMU extends SubsystemBase {
         givePower(rotX, rotY, rx);
     }
 
-    public void givePower(double rotX, double rotY, double rx){
+    public void givePower(double rotX, double rotY, double rx) {
         double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
         frontLeftPower = (rotY + rotX + rx) / denominator;
         backLeftPower = (rotY - rotX + rx) / denominator;
@@ -117,8 +119,6 @@ public class Drive9axisIMU extends SubsystemBase {
         backLeftPower = power;
         backRightPower = power;
     }
-
-
 
 
     @Override

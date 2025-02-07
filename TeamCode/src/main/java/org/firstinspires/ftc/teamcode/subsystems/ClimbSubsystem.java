@@ -23,7 +23,9 @@ public class ClimbSubsystem extends SubsystemBase {
     private ServoEx poignetServo;
     private Telemetry telemetry;
     private MotorGroup slideMotors;
-    private ClimbSubsystem() {}
+
+    private ClimbSubsystem() {
+    }
 
     public static ClimbSubsystem getInstance() {
         return INSTANCE;
@@ -45,7 +47,6 @@ public class ClimbSubsystem extends SubsystemBase {
         grabberLeftMotor.setZeroPowerBehavior(MotorEx.ZeroPowerBehavior.BRAKE);
 
 
-
         grabberRightMotor.setInverted(false);
         grabberLeftMotor.setInverted(true);
 
@@ -53,7 +54,5 @@ public class ClimbSubsystem extends SubsystemBase {
 
 
         slideMotors = new MotorGroup(grabberLeftMotor, grabberRightMotor);
-
-
     }
 }
