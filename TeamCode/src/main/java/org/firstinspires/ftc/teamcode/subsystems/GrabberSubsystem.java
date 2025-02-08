@@ -208,7 +208,6 @@ public class GrabberSubsystem extends SubsystemBase {
 
     public boolean startClimb() {
         if (!FinishClimb) {
-
             currentPosition = Math.max(POIGNET_SERVO_MIN_POSITION, Math.min(POIGNET_SERVO_MAX_POSITION, poignetServo.getPosition() + 2));
             if (grabberLeftMotor.getCurrentPosition() < -50 || grabberLeftMotor.getCurrentPosition() > 30) {
                 if (grabberLeftMotor.getCurrentPosition() > 10) {
@@ -218,7 +217,6 @@ public class GrabberSubsystem extends SubsystemBase {
                 }
                 FinishClimb = false;
                 return false;
-
             } else {
                 slideMotors.stopMotor();
                 FinishClimb = true;

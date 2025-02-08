@@ -125,22 +125,25 @@ public class Teleop extends Robot {
 //                        }, robotElevator, robotGrabber,robotDrive
 //                ));
 
-        Command climbCommand = new FunctionalCommand(
-            () -> {},
-            () -> {},
-            bool -> robotDrive.startClimb(1),
-            () -> {
-                boolean a = robotGrabber.startClimb();
-                boolean b = robotElevator.startClimb();
-                GlobalSubsystem.getInstance().telemetry.addLine("Running climb 1");
-                GlobalSubsystem.getInstance().telemetry.addData("Grabber state", a);
-                GlobalSubsystem.getInstance().telemetry.addData("Elevator state", b);
-                return (a && b) || pilotController.isDown(GamepadKeys.Button.BACK);
-            }
-        );
+
         pilotController.getGamepadButton(GamepadKeys.Button.DPAD_UP)
             .toggleWhenPressed(new StartEndCommand(
-                () -> CommandScheduler.getInstance().schedule(climbCommand),
+                () -> {
+                    Command climbCommand = new FunctionalCommand(
+                        () -> {},
+                        () -> {},
+                        bool -> robotDrive.startClimb(1),
+                        () -> {
+                            boolean a = robotGrabber.startClimb();
+                            boolean b = robotElevator.startClimb();
+                            GlobalSubsystem.getInstance().telemetry.addLine("Running climb 1");
+                            GlobalSubsystem.getInstance().telemetry.addData("Grabber state", a);
+                            GlobalSubsystem.getInstance().telemetry.addData("Elevator state", b);
+                            return (a && b) || pilotController.isDown(GamepadKeys.Button.BACK);
+                        }
+                    );
+                    CommandScheduler.getInstance().schedule(climbCommand);
+                },
                 () -> {
                     robotGrabber.stopGrabberPower();
                     robotDrive.startClimb(0);
