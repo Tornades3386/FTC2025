@@ -32,7 +32,7 @@ public class Teleop extends Robot {
             robotDrive.drive(
                 pilotController.getLeftY() * movementSlowdown,
                 pilotController.getLeftX() * movementSlowdown,
-                pilotController.getRightX() * movementSlowdown,
+                pilotController.getRightX() * 0.4 * movementSlowdown,
                 true);
 
             //if (pilotController.wasJustPressed(GamepadKeys.Button.START)) {

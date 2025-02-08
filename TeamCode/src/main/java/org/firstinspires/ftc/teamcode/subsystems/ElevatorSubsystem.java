@@ -97,12 +97,14 @@ public class ElevatorSubsystem extends SubsystemBase {
 
         if (power < 0 && !elevatorDownLimit.getState()) {
             elevatorMotors.stopMotor();
-            ElPinceServoCurrentPosition = PINCE_SERVO_OPEN_POSITION;
+            //doesnt set le poignet
             ElPoignetServoCurrentPosition = POIGNET_SERVO_MAX_POSITION;
+            ElPinceServoCurrentPosition = PINCE_SERVO_OPEN_POSITION;
         } else if (power > 0 && !elevatorDownLimit.getState()) {
             if (!pinceClose) {
                 enTransitPince = true;
-            } else if (pinceClose && !enTransitPince) {
+            } else if (!enTransitPince && pinceClose) {
+                pinceClose=false;
                 elevatorMotors.set(power);
             }
             //ElPinceServoCurrentPosition = PINCE_SERVO_MIN_POSITION
@@ -177,8 +179,9 @@ public class ElevatorSubsystem extends SubsystemBase {
         //telemetry.addData("Elevator Left", elevatorLeftMotor.getCurrentPosition());
         telemetry.addData("Elevator Right", elevatorRightMotorEncoder.getCurrentPosition());
         telemetry.addData("Elevator Limit Switch", elevatorDownLimit.getState());
-        telemetry.addData("EN TRANSIT Coude", enTransitCoude);
+        telemetry.addData("EN TRANSIT PINCE", enTransitPince);
         telemetry.addData("CLIMB ELEVATOR", FinishClimb);
+        telemetry.addData("PINCE ELEVATOR", ElPinceServo.getPosition());
         //telemetry.addData("Pince", pinceServo.get );
         //pinceServo.setPower(0.3);
 

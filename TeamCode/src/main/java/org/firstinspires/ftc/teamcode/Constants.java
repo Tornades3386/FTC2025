@@ -61,8 +61,8 @@ public class Constants {
         public static String ELEVATOR_COUDE_SERVO_NAME = "elevator1";
         public static String ELEVATOR_POIGNET_SERVO_NAME = "elevator2";
 
-        public static double PINCE_SERVO_CLOSED_POSITION = 0;
-        public static double PINCE_SERVO_OPEN_POSITION = 0.2;
+        public static double PINCE_SERVO_CLOSED_POSITION = 0.3;
+        public static double PINCE_SERVO_OPEN_POSITION = 0.55;
 
         public static double POIGNET_SERVO_MIN_POSITION = 0.83;
         public static double POIGNET_SERVO_MAX_POSITION = 0.94;
