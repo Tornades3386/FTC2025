@@ -85,7 +85,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         CoudeZero = false;
         pinceClose = false;
 
-        enTransitCoude = false;
+        enTransitCoude = true;
 
         enTransitPince = false;
 
@@ -145,9 +145,14 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public void setCoude() {
 
-        enTransitCoude = true;
-
-
+        //enTransitCoude = true;
+        if (!enTransitCoude){
+            ElCoudeServoCurrentPosition = COUDE_SERVO_MIN_POSITION;
+            enTransitCoude = true;
+        }else{
+            ElCoudeServoCurrentPosition = COUDE_SERVO_MAX_POSITION;
+            enTransitCoude = false;
+        }
     }
 
     public void addToCoude() {
@@ -180,8 +185,10 @@ public class ElevatorSubsystem extends SubsystemBase {
         telemetry.addData("Elevator Right", elevatorRightMotorEncoder.getCurrentPosition());
         telemetry.addData("Elevator Limit Switch", elevatorDownLimit.getState());
         telemetry.addData("EN TRANSIT PINCE", enTransitPince);
+        telemetry.addData("EN TRANSIT COUDE", enTransitCoude);
         telemetry.addData("CLIMB ELEVATOR", FinishClimb);
         telemetry.addData("PINCE ELEVATOR", ElPinceServo.getPosition());
+        telemetry.addData("Coude position", ElCoudeServo.getPosition());
         //telemetry.addData("Pince", pinceServo.get );
         //pinceServo.setPower(0.3);
 
@@ -199,21 +206,21 @@ public class ElevatorSubsystem extends SubsystemBase {
 
         if (enTransitPince) {
             if (ElPinceServoCurrentPosition > PINCE_SERVO_CLOSED_POSITION) {
-                ElPinceServoCurrentPosition -= 0.02;
+                ElPinceServoCurrentPosition -= 0.04;
             } else {
                 pinceClose = true;
                 enTransitPince = false;
             }
         }
 
-        if (enTransitCoude) {
+        /*if (enTransitCoude) {
             if (!CoudeZero) {
                 if (ElCoudeServoCurrentPosition < COUDE_SERVO_MID_POSITION) {
-                    ElPoignetServoCurrentPosition = POIGNET_SERVO_MIN_POSITION;
-                    ElCoudeServoCurrentPosition += 0.02;
+//                    ElPoignetServoCurrentPosition = POIGNET_SERVO_MIN_POSITION;
+                    ElCoudeServoCurrentPosition += 0.04;
 
                 } else {
-                    ElPoignetServoCurrentPosition = POIGNET_SERVO_MAX_POSITION;
+//                    ElPoignetServoCurrentPosition = POIGNET_SERVO_MAX_POSITION;
                     CoudeZero = true;
                     enTransitCoude = false;
                 }
@@ -221,16 +228,16 @@ public class ElevatorSubsystem extends SubsystemBase {
 
             } else {
                 if (ElCoudeServoCurrentPosition > COUDE_SERVO_MIN_POSITION) {
-                    ElPoignetServoCurrentPosition = POIGNET_SERVO_MIN_POSITION;
-                    ElCoudeServoCurrentPosition -= 0.02;
+//                    ElPoignetServoCurrentPosition = POIGNET_SERVO_MIN_POSITION;
+                    ElCoudeServoCurrentPosition -= 0.04;
 
                 } else {
-                    ElPoignetServoCurrentPosition = POIGNET_SERVO_MAX_POSITION;
+//                    ElPoignetServoCurrentPosition = POIGNET_SERVO_MAX_POSITION;
                     CoudeZero = false;
                     enTransitCoude = false;
                 }
             }
-        }
+        }*/
 
     }
 }

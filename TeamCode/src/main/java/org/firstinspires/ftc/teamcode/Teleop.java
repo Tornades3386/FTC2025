@@ -32,12 +32,28 @@ public class Teleop extends Robot {
             robotDrive.drive(
                 pilotController.getLeftY() * movementSlowdown,
                 pilotController.getLeftX() * movementSlowdown,
-                pilotController.getRightX() * 0.4 * movementSlowdown,
+                pilotController.getRightX() * 0.8 * movementSlowdown,
                 true);
 
             //if (pilotController.wasJustPressed(GamepadKeys.Button.START)) {
             //    robotDrive.resetPose(new Pose2d().rotate(-Math.PI * 1.5));
             //}
+
+            if (pilotController.isDown(GamepadKeys.Button.DPAD_LEFT)){
+                robotDrive.startClimb(1);
+            }else if (pilotController.wasJustReleased(GamepadKeys.Button.DPAD_LEFT)){
+                robotDrive.startClimb(0);
+            }
+            if (pilotController.isDown(GamepadKeys.Button.DPAD_RIGHT)){
+                robotDrive.startClimb(-1);
+            }else if (pilotController.wasJustReleased(GamepadKeys.Button.DPAD_RIGHT)){
+                robotDrive.startClimb(0);
+            }
+
+            if (pilotController.wasJustPressed(GamepadKeys.Button.START)){
+                robotDrive.resetIMU();
+            }
+
         }, robotDrive));
 
         robotGrabber.setDefaultCommand(new RunCommand(() -> {
@@ -81,7 +97,7 @@ public class Teleop extends Robot {
                 robotElevator.stopElevator();
             }
 
-            if (pilotController.wasJustPressed(GamepadKeys.Button.B)) {
+            if (pilotController.wasJustPressed(GamepadKeys.Button.B) || copilotController.wasJustPressed(GamepadKeys.Button.B)) {
                 robotElevator.setCoude();
             }
             if (pilotController.isDown(GamepadKeys.Button.RIGHT_STICK_BUTTON) || copilotController.isDown(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
@@ -92,14 +108,15 @@ public class Teleop extends Robot {
             if (pilotController.wasJustPressed(GamepadKeys.Button.A) || copilotController.wasJustPressed(GamepadKeys.Button.A)) {
                 robotElevator.addToCoude();
             }
+
         }, robotElevator));
 
         // when button dpad_up is pressed
         // execute command
-        AtomicBoolean climbStep1s1 = new AtomicBoolean(false);
-        AtomicBoolean climbStep1s2 = new AtomicBoolean(false);
-
-        AtomicBoolean climbStep1 = new AtomicBoolean(false);
+//        AtomicBoolean climbStep1s1 = new AtomicBoolean(false);
+//        AtomicBoolean climbStep1s2 = new AtomicBoolean(false);
+//
+//        AtomicBoolean climbStep1 = new AtomicBoolean(false);
 
 //        pilotController.getGamepadButton(GamepadKeys.Button.DPAD_UP)
 //                .toggleWhenPressed(new RunCommand(
@@ -125,37 +142,44 @@ public class Teleop extends Robot {
 //                        }, robotElevator, robotGrabber,robotDrive
 //                ));
 
+        Command climbCommand = new SequentialCommandGroup(
+            new FunctionalCommand(
+                () -> {},
+                () -> {},
+                bool -> {},
+                () -> {
+                    boolean a = robotGrabber.startClimb();
+                    boolean b = robotElevator.startClimb();
+                    GlobalSubsystem.getInstance().telemetry.addLine("Running climb 1");
+                    GlobalSubsystem.getInstance().telemetry.addData("Grabber state", a);
+                    GlobalSubsystem.getInstance().telemetry.addData("Elevator state", b);
+                    return (a && b) || pilotController.isDown(GamepadKeys.Button.BACK);
+                }
+            ),
+            new RunCommand(
+                () -> {
+                    robotDrive.startClimb(1);
+                    robotDrive.lockControl = true;
+                }
+            )
+        );
 
         pilotController.getGamepadButton(GamepadKeys.Button.DPAD_UP)
             .toggleWhenPressed(new StartEndCommand(
                 () -> {
-                    Command climbCommand = new FunctionalCommand(
-                        () -> {},
-                        () -> {},
-                        bool -> robotDrive.startClimb(1),
-                        () -> {
-                            boolean a = robotGrabber.startClimb();
-                            boolean b = robotElevator.startClimb();
-                            GlobalSubsystem.getInstance().telemetry.addLine("Running climb 1");
-                            GlobalSubsystem.getInstance().telemetry.addData("Grabber state", a);
-                            GlobalSubsystem.getInstance().telemetry.addData("Elevator state", b);
-                            return (a && b) || pilotController.isDown(GamepadKeys.Button.BACK);
-                        }
-                    );
                     CommandScheduler.getInstance().schedule(climbCommand);
                 },
                 () -> {
+                    CommandScheduler.getInstance().cancel(climbCommand);
                     robotGrabber.stopGrabberPower();
                     robotDrive.startClimb(0);
+                    robotDrive.lockControl = false;
                     robotElevator.stopElevator();
                 }
             ));
 
-        pilotController.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
-            .whenHeld(new StartEndCommand(
-                () -> robotGrabber.extendSlides(0.4),
-                () -> robotGrabber.extendSlides(0)
-            ));
+
+
 
         pilotController.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
             .toggleWhenPressed(new StartEndCommand(

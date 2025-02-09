@@ -48,6 +48,7 @@ public class Constants {
         public static String POIGNET_SERVO_NAME = "servoGrabberPoignet";
         public static String PINCE_SERVO_NAME = "servoGrabberPince";
         public static String GRABBER_DROP_LIMIT = "grabberDropLimit";
+        public static String GRABBER_FLOOR_LIMIT = "grabberFloorLimit";
         public static double POIGNET_SERVO_MIN_POSITION = 0;
         public static double POIGNET_SERVO_MAX_POSITION = 0.85;
         public static double POIGNET_SERVO_MID_POSITION = 0.35;
@@ -69,6 +70,6 @@ public class Constants {
 
         public static double COUDE_SERVO_MIN_POSITION = 0.12;
         public static double COUDE_SERVO_MID_POSITION = 0.83;
-        public static double COUDE_SERVO_MAX_POSITION = 1;
+        public static double COUDE_SERVO_MAX_POSITION = 0.30;
     }
 }

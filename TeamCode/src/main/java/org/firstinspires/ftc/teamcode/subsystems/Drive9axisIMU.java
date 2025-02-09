@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.ImuOrientationOnRobot;
 
+import org.apache.commons.math3.util.FastMath;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
@@ -38,6 +39,8 @@ public class Drive9axisIMU extends SubsystemBase {
     private double backLeftPower;
     private double frontRightPower;
     private double backRightPower;
+
+    public boolean lockControl = false;
 
     private Drive9axisIMU() {
     }
@@ -86,9 +89,13 @@ public class Drive9axisIMU extends SubsystemBase {
         rearLeft.setZeroPowerBehavior(MotorEx.ZeroPowerBehavior.BRAKE);
         rearRight.setZeroPowerBehavior(MotorEx.ZeroPowerBehavior.BRAKE);
 
+        lockControl = false;
     }
 
     public void drive(double leftY, double leftX, double rightX, boolean fieldRelative) {
+        if (lockControl) {
+            return;
+        }
         double rx;
         double rotY;
         double rotX;
@@ -99,8 +106,8 @@ public class Drive9axisIMU extends SubsystemBase {
             rotY = leftY;
 
         } else {
-            rotX = leftX * Math.cos(-botHeading) - leftY * Math.sin(-botHeading);
-            rotY = leftX * Math.sin(-botHeading) + leftY * Math.cos(-botHeading);
+            rotX = leftX * FastMath.cos(-botHeading) - leftY * FastMath.sin(-botHeading);
+            rotY = leftX * FastMath.sin(-botHeading) + leftY * FastMath.cos(-botHeading);
             rotX = rotX * 1.1;
         }
         rx = rightX;
@@ -108,7 +115,7 @@ public class Drive9axisIMU extends SubsystemBase {
     }
 
     public void givePower(double rotX, double rotY, double rx) {
-        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
+        double denominator = FastMath.max(FastMath.abs(rotY) + FastMath.abs(rotX) + FastMath.abs(rx), 1);
         frontLeftPower = (rotY + rotX + rx) / denominator;
         backLeftPower = (rotY - rotX + rx) / denominator;
         frontRightPower = (rotY - rotX - rx) / denominator;
@@ -219,4 +226,7 @@ public class Drive9axisIMU extends SubsystemBase {
     }
 
 
+    public void resetIMU() {
+        imu.resetYaw();
+    }
 }

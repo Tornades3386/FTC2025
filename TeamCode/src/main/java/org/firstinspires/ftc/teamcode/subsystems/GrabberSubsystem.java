@@ -19,6 +19,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.apache.commons.math3.util.FastMath;
 import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Constants.GrabberConstants;
@@ -34,7 +35,7 @@ public class GrabberSubsystem extends SubsystemBase {
     private ServoEx poignetServo;
     private Telemetry telemetry;
     private boolean dropState, pinceState, rightState, FinishClimb, resetGrabber;
-    private DigitalChannel grabberDropLimit;
+    private DigitalChannel grabberDropLimit, grabberLevelLimit;
     private ColorSensor colorPince;
     private MotorGroup slideMotors;
     private DistanceSensor colorPince_DistanceSensor;
@@ -73,7 +74,7 @@ public class GrabberSubsystem extends SubsystemBase {
 
         slideMotors = new MotorGroup(grabberLeftMotor, grabberRightMotor);
 
-        currentPosition = 0.50;
+        currentPosition = POIGNET_SERVO_MAX_POSITION;
         poignetServo.setPosition(currentPosition);
         pinceServo.setPower(0);
 
@@ -88,6 +89,10 @@ public class GrabberSubsystem extends SubsystemBase {
         grabberDropLimit = globalSubsystem.hardwareMap.get(DigitalChannel.class, GrabberConstants.GRABBER_DROP_LIMIT);
 
         grabberDropLimit.setMode(DigitalChannel.Mode.INPUT);
+
+        grabberLevelLimit = globalSubsystem.hardwareMap.get(DigitalChannel.class, GrabberConstants.GRABBER_FLOOR_LIMIT);
+
+        grabberLevelLimit.setMode(DigitalChannel.Mode.INPUT);
 
         colorPince = hardwareMap.get(ColorSensor.class, "colorPince");
         colorPince_DistanceSensor = hardwareMap.get(DistanceSensor.class, "colorPince");
@@ -118,13 +123,13 @@ public class GrabberSubsystem extends SubsystemBase {
     public void setPoignetPrinceSpeed() {
         if (!pinceState) {
             //Descendre la pince et tourner
-            currentPosition = Math.max(POIGNET_SERVO_MIN_POSITION, Math.min(POIGNET_SERVO_MAX_POSITION, poignetServo.getPosition() - 2));
-            //poignetServo.setPosition(Math.max(0.25, Math.min(1, poignetServo.getPosition() - 2)));
+            currentPosition = FastMath.max(POIGNET_SERVO_MIN_POSITION, FastMath.min(POIGNET_SERVO_MAX_POSITION, poignetServo.getPosition() - 2));
+            //poignetServo.setPosition(FastMath.max(0.25, FastMath.min(1, poignetServo.getPosition() - 2)));
             pinceServo.setPower(1);
             pinceState = true;
         } else {//if (grabberRightMotor.getCurrentPosition() > 400) {
-            currentPosition = Math.max(POIGNET_SERVO_MIN_POSITION, Math.min(POIGNET_SERVO_MAX_POSITION, poignetServo.getPosition() + 2));
-            //poignetServo.setPosition(Math.max(0.25, Math.min(1, poignetServo.getPosition() + 2)));
+            currentPosition = FastMath.max(POIGNET_SERVO_MIN_POSITION, FastMath.min(POIGNET_SERVO_MAX_POSITION, poignetServo.getPosition() + 2));
+            //poignetServo.setPosition(FastMath.max(0.25, FastMath.min(1, poignetServo.getPosition() + 2)));
             pinceServo.setPower(0);
             pinceState = false;
         }
@@ -137,11 +142,11 @@ public class GrabberSubsystem extends SubsystemBase {
     public void setGrabberPower(double power) {
         //Quand on rentre le Grabber
         /*if (power < 0 ) {
-            //newPositionPoignet = Math.max(0.25, Math.min(1, poignetServo.getPosition() + 2));
+            //newPositionPoignet = FastMath.max(0.25, FastMath.min(1, poignetServo.getPosition() + 2));
             //poignetServo.setPosition(newPositionPoignet);
             //Si on a un sample
             if (Double.parseDouble(JavaUtil.formatNumber(colorPince_DistanceSensor.getDistance(DistanceUnit.CM), 3)) < 3.2) {
-                //currentPosition = Math.max(GrabberConstants.POIGNET_SERVO_MIN_POSITION, Math.min(GrabberConstants.POIGNET_SERVO_MAX_POSITION, poignetServo.getPosition() + 2));
+                //currentPosition = FastMath.max(GrabberConstants.POIGNET_SERVO_MIN_POSITION, FastMath.min(GrabberConstants.POIGNET_SERVO_MAX_POSITION, poignetServo.getPosition() + 2));
                 currentPosition = POIGNET_SERVO_MID_POSITION;
             }
             //Quand on arrive a ;a limit switch
@@ -166,7 +171,7 @@ public class GrabberSubsystem extends SubsystemBase {
 
                     //pinceState = false;
 
-                    currentPosition = (Math.max(POIGNET_SERVO_MIN_POSITION, Math.min(POIGNET_SERVO_MAX_POSITION, poignetServo.getPosition() - 2)));
+                    currentPosition = (FastMath.max(POIGNET_SERVO_MIN_POSITION, FastMath.min(POIGNET_SERVO_MAX_POSITION, poignetServo.getPosition() - 2)));
                     //currentPosition = poignetServo.getPosition();
                     //pinceServo.setPower(0);
 
@@ -198,7 +203,7 @@ public class GrabberSubsystem extends SubsystemBase {
     }
 
     public void lastPush() {
-        currentPosition = Math.max(POIGNET_SERVO_MIN_POSITION, Math.min(POIGNET_SERVO_MIN_POSITION, poignetServo.getPosition() - 2));
+        currentPosition = FastMath.max(POIGNET_SERVO_MIN_POSITION, FastMath.min(POIGNET_SERVO_MIN_POSITION, poignetServo.getPosition() - 2));
         if (grabberLeftMotor.getCurrentPosition() > -400) {
             slideMotors.set(-1);
         } else {
@@ -208,7 +213,7 @@ public class GrabberSubsystem extends SubsystemBase {
 
     public boolean startClimb() {
         if (!FinishClimb) {
-            currentPosition = Math.max(POIGNET_SERVO_MIN_POSITION, Math.min(POIGNET_SERVO_MAX_POSITION, poignetServo.getPosition() + 2));
+            currentPosition = FastMath.max(POIGNET_SERVO_MIN_POSITION, FastMath.min(POIGNET_SERVO_MAX_POSITION, poignetServo.getPosition() + 2));
             if (grabberLeftMotor.getCurrentPosition() < -50 || grabberLeftMotor.getCurrentPosition() > 30) {
                 if (grabberLeftMotor.getCurrentPosition() > 10) {
                     slideMotors.set(-0.4);
@@ -234,7 +239,7 @@ public class GrabberSubsystem extends SubsystemBase {
     }
 
     public boolean extendSlides(double power) {
-        currentPosition = Math.max(POIGNET_SERVO_MIN_POSITION, Math.min(POIGNET_SERVO_MAX_POSITION, poignetServo.getPosition() + 2));
+        currentPosition = FastMath.max(POIGNET_SERVO_MIN_POSITION, FastMath.min(POIGNET_SERVO_MAX_POSITION, poignetServo.getPosition() + 2));
         if (power > 0 && grabberLeftMotor.getCurrentPosition() < 1000) {
             slideMotors.set(power);
             return false;
