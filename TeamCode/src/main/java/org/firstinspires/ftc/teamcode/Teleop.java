@@ -24,9 +24,9 @@ public class Teleop extends Robot {
         robotDrive.setDefaultCommand(new RunCommand(() -> {
             double movementSlowdown;
             if (pilotController.isDown(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
-                movementSlowdown = 0.6;
+                movementSlowdown = 0.3;
             } else {
-                movementSlowdown = 1;
+                movementSlowdown = 0.5;
             }
 
             robotDrive.drive(
@@ -142,7 +142,7 @@ public class Teleop extends Robot {
 //                        }, robotElevator, robotGrabber,robotDrive
 //                ));
 
-        Command climbCommand = new SequentialCommandGroup(
+        /*Command climbCommand = new SequentialCommandGroup(
             new FunctionalCommand(
                 () -> {},
                 () -> {},
@@ -193,16 +193,16 @@ public class Teleop extends Robot {
                     robotDrive.startClimb(0);
                     robotElevator.stopElevator();
                 }, robotElevator, robotGrabber, robotDrive
-            ));
-        /*.andThen(
-                        new RunCommand(
-                                () -> {
-                                    //robotDrive.startClimb(0.1);
-                                    robotGrabber.extendSlides(-1);
-                                },robotDrive, robotGrabber
-                        )));*/
-        /*pilotController.getGamepadButton(GamepadKeys.Button.DPAD_UP).and(
-                pilotController.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed()
-        )*/
+            ));*/
+        //.andThen(
+        //                new RunCommand(
+        //                        () -> {
+        //                            //robotDrive.startClimb(0.1);
+        //                            robotGrabber.extendSlides(-1);
+        //                        },robotDrive, robotGrabber
+        //                )));
+        //pilotController.getGamepadButton(GamepadKeys.Button.DPAD_UP).and(
+        //        pilotController.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed()
+        //)
     }
 }

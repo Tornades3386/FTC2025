@@ -145,14 +145,14 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public void setCoude() {
 
-        //enTransitCoude = true;
-        if (!enTransitCoude){
+        enTransitCoude = true;
+        /*if (!enTransitCoude){
             ElCoudeServoCurrentPosition = COUDE_SERVO_MIN_POSITION;
             enTransitCoude = true;
         }else{
             ElCoudeServoCurrentPosition = COUDE_SERVO_MAX_POSITION;
             enTransitCoude = false;
-        }
+        }*/
     }
 
     public void addToCoude() {
@@ -213,14 +213,14 @@ public class ElevatorSubsystem extends SubsystemBase {
             }
         }
 
-        /*if (enTransitCoude) {
+        if (enTransitCoude) {
             if (!CoudeZero) {
                 if (ElCoudeServoCurrentPosition < COUDE_SERVO_MID_POSITION) {
-//                    ElPoignetServoCurrentPosition = POIGNET_SERVO_MIN_POSITION;
+                    ElPoignetServoCurrentPosition = POIGNET_SERVO_MIN_POSITION;
                     ElCoudeServoCurrentPosition += 0.04;
 
                 } else {
-//                    ElPoignetServoCurrentPosition = POIGNET_SERVO_MAX_POSITION;
+                    ElPoignetServoCurrentPosition = POIGNET_SERVO_MAX_POSITION;
                     CoudeZero = true;
                     enTransitCoude = false;
                 }
@@ -228,16 +228,16 @@ public class ElevatorSubsystem extends SubsystemBase {
 
             } else {
                 if (ElCoudeServoCurrentPosition > COUDE_SERVO_MIN_POSITION) {
-//                    ElPoignetServoCurrentPosition = POIGNET_SERVO_MIN_POSITION;
-                    ElCoudeServoCurrentPosition -= 0.04;
+                    ElPoignetServoCurrentPosition = POIGNET_SERVO_MIN_POSITION;
+                    ElCoudeServoCurrentPosition -= 0.03;
 
                 } else {
-//                    ElPoignetServoCurrentPosition = POIGNET_SERVO_MAX_POSITION;
+                    ElPoignetServoCurrentPosition = POIGNET_SERVO_MAX_POSITION;
                     CoudeZero = false;
                     enTransitCoude = false;
                 }
             }
-        }*/
+        }
 
     }
 }

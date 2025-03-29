@@ -188,7 +188,7 @@ public class GrabberSubsystem extends SubsystemBase {
         }else if(!resetGrabber){
             slideMotors.set(power);
         }*/
-        if (power > 0 && resetGrabber && grabberLeftMotor.getCurrentPosition() < 800){
+        if (power > 0 && resetGrabber){// && grabberLeftMotor.getCurrentPosition() < 800){
             slideMotors.set(power);}
         else if (!resetGrabber){
             slideMotors.set(power);

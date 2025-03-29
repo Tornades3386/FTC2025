@@ -65,11 +65,11 @@ public class Constants {
         public static double PINCE_SERVO_CLOSED_POSITION = 0.3;
         public static double PINCE_SERVO_OPEN_POSITION = 0.55;
 
-        public static double POIGNET_SERVO_MIN_POSITION = 0.83;
+        public static double POIGNET_SERVO_MIN_POSITION = 0.54 ;
         public static double POIGNET_SERVO_MAX_POSITION = 0.94;
 
-        public static double COUDE_SERVO_MIN_POSITION = 0.12;
-        public static double COUDE_SERVO_MID_POSITION = 0.83;
-        public static double COUDE_SERVO_MAX_POSITION = 0.30;
+        public static double COUDE_SERVO_MIN_POSITION = 0.30;
+        public static double COUDE_SERVO_MID_POSITION = 0.90;
+        public static double COUDE_SERVO_MAX_POSITION = 1 ;
     }
 }
